@@ -8,6 +8,9 @@ import ModalExample from '../components/Picker';
 //import ModalForAccounts from '../components/Picker_Accounts';
 import MyDatePicker from '../components/DatePicker'
 import DatePicker from 'react-native-datepicker'
+import Storage from '../assets/storage/Storage'
+import { AsyncStorage } from 'react-native';
+//import AsyncStorage from '@react-native-community/async-storage';
 
 
 export class DeepDetailScreen extends React.Component {
@@ -46,7 +49,30 @@ export class DeepDetailScreen extends React.Component {
         this.setModalVisible(!this.state.modalVisible);
     }
     saveInfo() {
-        this.props.navigation.navigate('Detail', { data: this.state })
+        //alert('testing')
+        // this.props.navigation.navigate('Detail', { data: this.state })
+
+        let obj = {
+            id: 1,
+            title: "Тинькофф",
+            amount: 12399,
+            description: "Командировка",
+            category: 2,
+            date: 1578064159
+        }
+        AsyncStorage.setItem('transaction', JSON.stringify(obj))
+    }
+
+
+    displayInfo = async () => {
+        try {
+            let transaction = await AsyncStorage.getItem('transaction');
+            let parsed = JSON.parse(transaction);
+            alert(parsed.title)
+        }
+        catch{
+            alert(error)
+        }
     }
 
     render() {
@@ -59,9 +85,11 @@ export class DeepDetailScreen extends React.Component {
                         }}
                     ><Text style={styles.leftHeaderText}>Назад</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.centerHeader}><Text style={styles.centerHeaderText}>Операция</Text></TouchableOpacity>
+                    <TouchableOpacity style={styles.centerHeader}
+                        onPress={this.displayInfo}
+                    ><Text style={styles.centerHeaderText}>Операция</Text></TouchableOpacity>
                     <TouchableOpacity style={styles.rightHeader}
-                        onPress={() => this.saveInfo()}
+                        onPress={this.saveInfo}
                     ><Text style={styles.rightHeaderText}>Сохранить</Text></TouchableOpacity>
                 </View>
                 <View style={styles.menu}>

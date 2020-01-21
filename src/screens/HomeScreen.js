@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import accounts from "../data/accounts.json"
 import { Button } from 'react-native-ui-kitten';
+import Storage from '../assets/storage/Storage'
 
 
 export class HomeScreen extends React.Component {

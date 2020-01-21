@@ -6,6 +6,7 @@ import accounts from "../data/accounts.json"
 import categories from "../data/categories.json"
 import Moment from 'react-moment';
 import AddTransactionScreen from './AddTransactionScreen'
+import Storage from '../assets/storage/Storage'
 
 export class DetailScreen extends React.Component {
 
@@ -14,15 +15,14 @@ export class DetailScreen extends React.Component {
         this.state = {
             accounts: accounts,
             categories: categories
-
         }
+
         if (this.props.navigation.getParam('data')) {
             const newData = this.props.navigation.getParam('data')
             let val = this.state.accounts;
             val[newData.id].transactions.title = newData.title
             this.setState({
                 accounts: val
-
             })
         }
     }
