@@ -11,12 +11,14 @@ import DatePicker from 'react-native-datepicker'
 import Storage from '../assets/storage/Storage'
 import { AsyncStorage } from 'react-native';
 //import AsyncStorage from '@react-native-community/async-storage';
+import {resetTo} from '../helpers/Screens'
+
+
 
 
 export class DeepDetailScreen extends React.Component {
     constructor(props) {
         super(props);
-        console.log(props);
         this.state = {
             accounts: accounts,
             categories: categories,
@@ -34,12 +36,14 @@ export class DeepDetailScreen extends React.Component {
             id: props.id,
             selectedItemId: 0,
             date: this.props.navigation.getParam('date'),
-            saveInfo: this.props.navigation.getParam('saveInfo')
+            saveInfo: this.props.navigation.getParam('saveInfo'),
         }
     }
     componentDidMount() {
         const category = this.state.categories.filter(f => f.id === this.state.accounts[0].transactions[0].category)[0].title
         this.setState({ category })
+
+
     }
     setModalVisible(visible) {
         this.setState({ modalVisible: visible });
@@ -48,26 +52,37 @@ export class DeepDetailScreen extends React.Component {
         this.setState({ title: account.title, selectedItemId: account.id });
         this.setModalVisible(!this.state.modalVisible);
     }
-    saveInfo() {
-        //alert('testing')
+    saveInfo = () => {
+        //   alert('testing')
         // this.props.navigation.navigate('Detail', { data: this.state })
-
+        /* let obj = {
+             id: 1,
+             title: "Тинькоффbc",
+             amount: 12399,
+             description: "Командировка",
+             category: 2,
+             date: 1578064159
+         }*/
+        const { title, amount } = this.state
         let obj = {
-            id: 1,
-            title: "Тинькофф",
-            amount: 12399,
-            description: "Командировка",
-            category: 2,
-            date: 1578064159
+            title: title,
+            amount: amount
         }
-        AsyncStorage.setItem('transaction', JSON.stringify(obj))
+        AsyncStorage.setItem('transaction', JSON.stringify(obj), (callback) => {
+            this.props.navigation.navigate('Detail');
+        })
+
+
+
     }
 
 
     displayInfo = async () => {
+
         try {
             let transaction = await AsyncStorage.getItem('transaction');
             let parsed = JSON.parse(transaction);
+            this.state.title = parsed.title
             alert(parsed.title)
         }
         catch{

@@ -8,23 +8,23 @@ import Moment from 'react-moment';
 import AddTransactionScreen from './AddTransactionScreen'
 import Storage from '../assets/storage/Storage'
 
+
+
 export class DetailScreen extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
             accounts: accounts,
-            categories: categories
-        }
+            categories: categories,
 
-        if (this.props.navigation.getParam('data')) {
-            const newData = this.props.navigation.getParam('data')
-            let val = this.state.accounts;
-            val[newData.id].transactions.title = newData.title
-            this.setState({
-                accounts: val
-            })
         }
+        alert('Detail screen')
+    }
+
+    componentDidMount() {
+ 
+
     }
 
     timestampToDate(ts) {
@@ -40,17 +40,31 @@ export class DetailScreen extends React.Component {
         return sum / 100
     }
 
+    bumbum = () => {
+        alert(this.state.title)
+    }
+    displayInfo = async () => {
 
-
+        try {
+            let transaction = await AsyncStorage.getItem('transaction');
+            let parsed = JSON.parse(transaction);
+            this.state.title = parsed.title
+            alert(parsed.title)
+        }
+        catch{
+            alert(error)
+        }
+    }
 
     render() {
         return (
             <View style={styles.container}>
                 <View style={styles.header}>
                     <TouchableOpacity style={styles.leftHeader}
-                        onPress={() => {
-                            this.props.navigation.navigate('Home')
-                        }}
+                        //  onPress={() => {
+                        //    this.props.navigation.navigate('Home')
+                        //}}
+                        onPress={this.bumbum}
                     ><Image source={require('../assets/image/back.png')} style={styles.back}
                         />
                         <Text style={styles.leftHeaderText}>Cчета</Text></TouchableOpacity>
@@ -59,6 +73,7 @@ export class DetailScreen extends React.Component {
                 <FlatList
                     // data={this.state.accounts[0].transactions}
                     data={this.props.navigation.getParam('transactions')}
+                    extraData={this.state}
                     style={styles.list}
 
                     renderItem={({ item }) => (

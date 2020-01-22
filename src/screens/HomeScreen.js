@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import accounts from "../data/accounts.json"
 import { Button } from 'react-native-ui-kitten';
+import AsyncStorage from '@react-native-community/async-storage';
 import Storage from '../assets/storage/Storage'
 
 
@@ -27,6 +28,8 @@ export class HomeScreen extends React.Component {
         }
         return sum / 100
     }
+
+   
 
 
 
