@@ -28,7 +28,7 @@ export class HomeScreen extends React.Component {
         }
         return sum / 100
     }
-
+    
    
 
 
@@ -56,6 +56,7 @@ export class HomeScreen extends React.Component {
                                             title: item.title,
                                             description: item.description,
                                             transactions: item.transactions,
+                                            category:item.category,
                                             balance: item.balance,
                                             title:item.title
                                         })

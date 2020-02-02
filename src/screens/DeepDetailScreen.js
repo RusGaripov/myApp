@@ -1,4 +1,3 @@
-
 import React, { Component } from 'react';
 import { Modal, Text, View, TextInput, StyleSheet, Image, FlatList, TouchableOpacity } from 'react-native';
 import accounts from "../data/accounts.json"
@@ -8,10 +7,9 @@ import ModalExample from '../components/Picker';
 //import ModalForAccounts from '../components/Picker_Accounts';
 import MyDatePicker from '../components/DatePicker'
 import DatePicker from 'react-native-datepicker'
-import Storage from '../assets/storage/Storage'
 import { AsyncStorage } from 'react-native';
 //import AsyncStorage from '@react-native-community/async-storage';
-import {resetTo} from '../helpers/Screens'
+import { resetTo } from '../helpers/Screens'
 
 
 
@@ -23,9 +21,11 @@ export class DeepDetailScreen extends React.Component {
             accounts: accounts,
             categories: categories,
             title: this.props.navigation.getParam('title'),
-            amount: props.amount,
-            description: accounts[0].transactions[0].description,
-            category: props.category,
+            data: this.props.navigation.getParam('data'),
+            id: this.props.navigation.getParam('id'),
+            amount: this.props.navigation.getParam('amount'),
+            description: this.props.navigation.getParam('description'),
+            category: 'h',
             activeLeft: true,
             activeCenter: false,
             activeRight: false,
@@ -33,14 +33,15 @@ export class DeepDetailScreen extends React.Component {
             modalVisible: false,
             selectedItemId: 0,
             modalVisible: false,
-            id: props.id,
             selectedItemId: 0,
             date: this.props.navigation.getParam('date'),
-            saveInfo: this.props.navigation.getParam('saveInfo'),
+            text: this.props.navigation.getParam('amount') / 100 + ' ' + "₽",
+            text_2: this.props.navigation.getParam('description')
         }
     }
     componentDidMount() {
         const category = this.state.categories.filter(f => f.id === this.state.accounts[0].transactions[0].category)[0].title
+
         this.setState({ category })
 
 
@@ -53,23 +54,31 @@ export class DeepDetailScreen extends React.Component {
         this.setModalVisible(!this.state.modalVisible);
     }
     saveInfo = () => {
-        //   alert('testing')
-        // this.props.navigation.navigate('Detail', { data: this.state })
-        /* let obj = {
-             id: 1,
-             title: "Тинькоффbc",
-             amount: 12399,
-             description: "Командировка",
-             category: 2,
-             date: 1578064159
-         }*/
-        const { title, amount } = this.state
-        let obj = {
-            title: title,
-            amount: amount
+        const { title, amount, id, description, category, date, activeLeft } = this.state
+        let obj
+        if (activeLeft)
+            obj = {
+                id: id,
+                title: title,
+                amount: '-' + this.state.text,
+                description: this.state.text_2,
+                category: category,
+                date: date,
+                categories: categories,
+            }
+        else {
+            obj = {
+                id: id,
+                title: title,
+                amount: this.state.text,
+                description: this.state.text_2,
+                category: category,
+                date: date,
+                categories: categories,
+            }
         }
-        AsyncStorage.setItem('transaction', JSON.stringify(obj), (callback) => {
-            this.props.navigation.navigate('Detail');
+        AsyncStorage.setItem('trans', JSON.stringify(obj), (callback) => {
+            // this.props.navigation.navigate('Detail');
         })
 
 
@@ -80,15 +89,15 @@ export class DeepDetailScreen extends React.Component {
     displayInfo = async () => {
 
         try {
-            let transaction = await AsyncStorage.getItem('transaction');
-            let parsed = JSON.parse(transaction);
-            this.state.title = parsed.title
-            alert(parsed.title)
+            let trans = await AsyncStorage.getItem('trans');
+            let parsed = JSON.parse(trans);
+            //  alert(parsed.activeLeft)
         }
         catch{
             alert(error)
         }
     }
+   
 
     render() {
         return (
@@ -244,9 +253,9 @@ export class DeepDetailScreen extends React.Component {
                         </View>
                         {/*  <Text style={styles.listTitle_2}
                         >{this.state.categories.filter(f => f.id === this.state.accounts[0].transactions[0].category)[0].title}</Text>*/}
-                        <TextInput style={styles.listTitle_2} value={this.props.navigation.getParam('description')} />
-                        {!this.state.activeCenter ? <TextInput style={styles.listTitle_2} value={this.props.navigation.getParam('amount') / 100 + ' ' + "₽"} />
-                            : <TextInput style={styles.listTitle_2_green} value={this.props.navigation.getParam('amount') / 100 + ' ' + "₽"} />}
+                        <TextInput style={styles.listTitle_2} onChangeText={(text_2) => this.setState({ text_2 })} value={this.state.text_2} />
+                        {!this.state.activeCenter ? <TextInput style={styles.listTitle_2} onChangeText={(text) => this.setState({ text })} value={this.state.text} />
+                            : <TextInput style={styles.listTitle_2_green} onChangeText={(text) => this.setState({ text })} value={this.state.text} />}
                     </View>
                     <View style={styles.forwardContainer}>
                         <Image source={require('../assets/image/forward.png')} style={styles.forward} />

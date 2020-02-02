@@ -6,7 +6,7 @@ import accounts from "../data/accounts.json"
 import categories from "../data/categories.json"
 import Moment from 'react-moment';
 import AddTransactionScreen from './AddTransactionScreen'
-import Storage from '../assets/storage/Storage'
+import Storage from '../helpers/Storage'
 
 
 
@@ -17,13 +17,22 @@ export class DetailScreen extends React.Component {
         this.state = {
             accounts: accounts,
             categories: categories,
-
+            datam: this.props.navigation.getParam('transactions'),
+            category: this.props.navigation.getParam('category'),
+            description: this.props.navigation.getParam('description'),
+            title: this.props.navigation.getParam('title'),
+            id: this.props.navigation.getParam('id'),
+            id: this.props.navigation.getParam('activeLeft'),
         }
         alert('Detail screen')
     }
 
     componentDidMount() {
- 
+
+        this.setState({
+            title: this.state.title
+        })
+
 
     }
 
@@ -40,16 +49,24 @@ export class DetailScreen extends React.Component {
         return sum / 100
     }
 
-    bumbum = () => {
-        alert(this.state.title)
-    }
+
     displayInfo = async () => {
 
         try {
-            let transaction = await AsyncStorage.getItem('transaction');
-            let parsed = JSON.parse(transaction);
-            this.state.title = parsed.title
-            alert(parsed.title)
+            let trans = await AsyncStorage.getItem('trans');
+            let parsed = JSON.parse(trans);
+            let p = parsed.id - 1
+            this.state.datam[p].title = parsed.title
+           // this.state.datam[p].amount = '-' + this.state.datam[p].amount
+            this.state.datam[p].amount = parseInt(parsed.amount, 10);
+            this.state.datam[p].description = parsed.description
+            // this.state.datam[p].date = parsed.date
+            this.setState({
+                title: parsed.title,
+                //  date:parsed.date
+
+            })
+            alert()
         }
         catch{
             alert(error)
@@ -64,7 +81,7 @@ export class DetailScreen extends React.Component {
                         //  onPress={() => {
                         //    this.props.navigation.navigate('Home')
                         //}}
-                        onPress={this.bumbum}
+                        onPress={this.displayInfo}
                     ><Image source={require('../assets/image/back.png')} style={styles.back}
                         />
                         <Text style={styles.leftHeaderText}>Cчета</Text></TouchableOpacity>
@@ -87,7 +104,9 @@ export class DetailScreen extends React.Component {
                                     this.props.navigation.navigate('DeepDetail', {
                                         amount: item.amount,
                                         title: item.title,
+                                        id: item.id,
                                         description: item.description,
+                                        // category:item.category,
                                         category: this.state.categories.filter(f => f.id === item.category)[0].title,
                                         date: this.timestampToDate(item.date),
                                     })
