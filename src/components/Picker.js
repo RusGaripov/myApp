@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Modal, Text, Image, TouchableOpacity, StyleSheet, FlatList, View, Alert } from 'react-native';
-
+import categories from "../data/categories.json"
 
 class ModalExample extends Component {
   constructor(props) {
@@ -13,14 +13,26 @@ class ModalExample extends Component {
       checked: false,
       selectedItemId: 0,
       title: props.title,
-      callback: props.callback
+      callback: props.callback,
+      picker: props.picker,
+      addItemQuantityPress: props.addItemQuantityPress,
+      categories: props.categories,
+      //  hey:props.hey
+
     }
   }
+
+handleAddItemQuantity = (title) => {
+  alert(title)
+   this.props.addItemQuantityPress(title);
+ }
+
+
   _onPress(account) {
+    this.handleAddItemQuantity(account.title)
     this.setState({ title: account.title, selectedItemId: account.id });
     this.setModalVisible(!this.state.modalVisible);
-    if (this.state.callback)
-      this.state.callback({ title: this.state.title, id: this.state.id });
+
   }
 
   setModalVisible(visible) {
@@ -28,54 +40,60 @@ class ModalExample extends Component {
   }
   render() {
     return (
-      <View style={styles.container}>
-        <Modal
-          animationType="slide"
-          transparent={false}
-          visible={this.state.modalVisible}
-          onRequestClose={() => {
-            Alert.alert('Modal has been closed.');
-          }}>
-          <View style={styles.listAndCloser}>
-            <View style={styles.list}>
-              <FlatList
-                data={DATA}
-                keyExtractor={item => item.id}
-                renderItem={({ item }) => (
-                  <View style={styles.groupModal}>
-                    <TouchableOpacity
-                      onPress={(id) => this._onPress(item, id)}>
-                      <View style={styles.subItem}>
-                        <Text style={styles.subItemText}>{item.title}</Text>
+      <>
+       
+        <View style={styles.container}>
+          <Modal
+            animationType="slide"
+            transparent={false}
+            visible={this.state.modalVisible}
+            onRequestClose={() => {
+              Alert.alert('Modal has been closed.');
+            }}>
+            <View style={styles.listAndCloser}>
+              <View style={styles.list}>
+                <FlatList
+                  data={categories}
+                  keyExtractor={item => item.id}
+                  renderItem={({ item }) => (
+                    <View style={styles.groupModal}>
+                     
+                      <TouchableOpacity
+                        onPress={(id) => this._onPress(item, id)
+                        }>
+                  
+                        <View style={styles.subItem}>
+                          <Text style={styles.subItemText}>{item.title}</Text>
+                        </View>
+                      </TouchableOpacity>
+                      <View style={styles.checkbox}>
+                        {
+                          item.id == this.state.selectedItemId ? <Image
+                            source={require('../assets/image/check.png')} style={styles.check} /> : null}
                       </View>
-                    </TouchableOpacity>
-                    <View style={styles.checkbox}>
-                      {
-                        item.id == this.state.selectedItemId ? <Image
-                          source={require('../assets/image/check.png')} style={styles.check} /> : null}
                     </View>
-                  </View>
-                )}
-              />
-            </View>
-            <View style={styles.closerContainer} >
-              <TouchableOpacity
-                onPress={() => {
-                  this.setModalVisible(!this.state.modalVisible);
-                }}><Image source={require('../assets/image/closer.png')} style={styles.closer}
+                  )}
                 />
-              </TouchableOpacity>
+              </View>
+              <View style={styles.closerContainer} >
+                <TouchableOpacity
+                  onPress={() => {
+                    this.setModalVisible(!this.state.modalVisible);
+                  }}><Image source={require('../assets/image/closer.png')} style={styles.closer}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
 
-        </Modal>
-        <TouchableOpacity
-          onPress={() => {
-            this.setModalVisible(true);
-          }}>
-          <Text style={styles.selected}>{this.state.title}</Text>
-        </TouchableOpacity>
-      </View>
+          </Modal>
+          <TouchableOpacity
+            onPress={() => {
+              this.setModalVisible(true);
+            }}>
+            <Text style={styles.selected}>{this.state.title}</Text>
+          </TouchableOpacity>
+        </View>
+      </>
     );
   }
 }
@@ -83,7 +101,7 @@ class ModalExample extends Component {
 
 
 
-const DATA = [
+/*const DATA = [
   {
     id: 1,
     title: 'Машина',
@@ -109,7 +127,7 @@ const DATA = [
     title: 'Магнит',
   },
 
-];
+];*/
 
 const styles = StyleSheet.create({
   container: {

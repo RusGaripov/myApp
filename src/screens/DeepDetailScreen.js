@@ -25,7 +25,7 @@ export class DeepDetailScreen extends React.Component {
             id: this.props.navigation.getParam('id'),
             amount: this.props.navigation.getParam('amount'),
             description: this.props.navigation.getParam('description'),
-            category: 'h',
+            category: this.props.navigation.getParam('category'),
             activeLeft: true,
             activeCenter: false,
             activeRight: false,
@@ -36,7 +36,8 @@ export class DeepDetailScreen extends React.Component {
             selectedItemId: 0,
             date: this.props.navigation.getParam('date'),
             text: this.props.navigation.getParam('amount') / 100 + ' ' + "₽",
-            text_2: this.props.navigation.getParam('description')
+            text_2: this.props.navigation.getParam('description'),
+           
         }
     }
     componentDidMount() {
@@ -44,15 +45,21 @@ export class DeepDetailScreen extends React.Component {
 
         this.setState({ category })
 
+    }
 
-    }
-    setModalVisible(visible) {
-        this.setState({ modalVisible: visible });
-    }
-    _onPress(account) {
-        this.setState({ title: account.title, selectedItemId: account.id });
-        this.setModalVisible(!this.state.modalVisible);
-    }
+
+
+    
+    addItemQuantity = (title, category, account) => {
+    //    alert(category)
+        //alert(title)
+        this.setState({
+           category:title
+       })
+    
+   };
+
+
     saveInfo = () => {
         const { title, amount, id, description, category, date, activeLeft } = this.state
         let obj
@@ -91,13 +98,13 @@ export class DeepDetailScreen extends React.Component {
         try {
             let trans = await AsyncStorage.getItem('trans');
             let parsed = JSON.parse(trans);
-            //  alert(parsed.activeLeft)
+            alert(this.state.category)
         }
         catch{
             alert(error)
         }
     }
-   
+
 
     render() {
         return (
@@ -249,7 +256,7 @@ export class DeepDetailScreen extends React.Component {
                         </View>
 
                         <View style={styles.listTitle_3}>
-                            <ModalExample title={this.props.navigation.getParam('category')} selectField={'Центр'} callback={(data) => { }} />
+                            <ModalExample title={this.state.category} selectField={'Центр'}  addItemQuantityPress={this.addItemQuantity} />
                         </View>
                         {/*  <Text style={styles.listTitle_2}
                         >{this.state.categories.filter(f => f.id === this.state.accounts[0].transactions[0].category)[0].title}</Text>*/}
