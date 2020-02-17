@@ -14,7 +14,6 @@ export class DeepDetailScreen extends React.Component {
             date: this.props.navigation.getParam('date'),
             title: this.props.navigation.getParam('title'),
             id: this.props.navigation.getParam('id'),
-            //   amount: this.props.navigation.getParam('amount'),
             description: this.props.navigation.getParam('description'),
             category: this.props.navigation.getParam('category'),
             activeLeft: true,
@@ -26,13 +25,10 @@ export class DeepDetailScreen extends React.Component {
             text_2: this.props.navigation.getParam('description'),
             id_2: null
         }
-        //   alert(this.state.categories[0].title)
     }
 
 
     addItemQuantity = (title, id, account) => {
-        //    alert(category)
-        //    alert(title)
         this.setState({
             category: title
         })
@@ -46,11 +42,9 @@ export class DeepDetailScreen extends React.Component {
         let obj
 
         if (activeLeft) {
-            // this.state.text =
             obj = {
                 id: id,
                 title: title,
-                //  amount:parseInt((-this.state.text), 10)*100,
                 amount: '-'+this.state.text,
                 description: this.state.text_2,
                 category: category,
@@ -64,7 +58,6 @@ export class DeepDetailScreen extends React.Component {
                 id: id,
                 title: title,
                 amount: this.state.text,
-                //   amount: parseInt(this.state.text, 10)*100,
                 description: this.state.text_2,
                 category: category,
                 date: date,
@@ -82,7 +75,7 @@ export class DeepDetailScreen extends React.Component {
         try {
             let trans = await AsyncStorage.getItem('trans')
             let parsed = JSON.parse(trans)
-            //    alert(parsed.category)
+            //    alert(parsed.id)
         }
         catch (error) {
             alert(error)

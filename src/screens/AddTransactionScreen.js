@@ -20,23 +20,12 @@ export class AddTransactionScreen extends React.Component {
             text_2: this.props.navigation.getParam('description'),
             text: Math.abs(this.props.navigation.getParam('amount') / 100) + ' ' + "₽",
             title: 'Выберите счет',
-            // category: null,
             activeLeft: true,
             activeCenter: false,
             activeRight: false,
             selectField: 'Справа',
             modalVisible: false,
             selectedItemId: 0,
-            notes: [
-                {
-                    id: 0,
-                    title: 'rococo'
-                },
-                {
-                    id: 1,
-                    title: 'bumbaramba'
-                },
-            ]
         }
     }
 
@@ -56,8 +45,6 @@ export class AddTransactionScreen extends React.Component {
     }
 
     addItemQuantity = (title, id, account) => {
-        //    alert(category)
-        alert(title)
         this.setState({
             category: title
         })
@@ -68,89 +55,61 @@ export class AddTransactionScreen extends React.Component {
 
 
     saveInfo_3 = async () => {
-        const { title, balance, id, date, category, description, activeLeft, categories } = this.state
+        const { title, balance, id, date, category, description, activeLeft, amount, categories } = this.state
         let obj_3
         if (activeLeft) {
-            // this.state.text =
             obj_3 = {
-                id: id,
+                id: 6,
                 title: title,
-                //  amount:parseInt((-this.state.text), 10)*100,
-                amount: 1,
-                description: 'Х',
-                category: 'Фига',
-               // date: 0,
+                date: date,
+                amount: '-' + this.state.text,
+                description: this.state.text_2,
+                category: category,
                 categories: categories,
-
             }
         }
         else {
             obj_3 = {
-                id: id,
+                id: 6,
                 title: title,
-                amount: this.state.text,
-                //   amount: parseInt(this.state.text, 10)*100,
+                amount: this.state.text_2,
                 description: this.state.text_2,
                 category: category,
                 date: date,
                 categories: categories,
             }
 
-            await AsyncStorage.setItem('adder', JSON.stringify(obj_3));
-        }
 
+        }
+        await AsyncStorage.setItem('adder', JSON.stringify(obj_3));
+       this.goToDetail()
     }
+
+    goToDetail = () => {
+            this.props.navigation.navigate('Detail', {
+               
+            })
+    }
+
 
     displayInfo_3 = async () => {
         try {
             let adder = await AsyncStorage.getItem('adder')
             let parsed = JSON.parse(adder)
-            this.state.description=parsed.description
-            this.setState({
-                // data: JSON.parse(data),
-                description: parsed.description
-            })
-            alert(parsed.description)
+            alert(parsed.id)
         }
         catch (error) {
             alert(error)
         }
     }
 
-
-
-
-
-
-
-
     setModalVisible(visible) {
         this.setState({ modalVisible: visible });
     }
 
-
-    eachNote(title) {
-        return (
-            <Text>{title.title}</Text>
-        )
-    }
-
-    check = () => {
-        alert(o)
-    }
-
-    nextId = () => {
-        this.uniqueId = this.uniqueId || 0
-        return this.uniqueId
-    }
-
-
-
-
     _onPress(account) {
         this.setState({ title: account.title, selectedItemId: account.id });
         this.setModalVisible(!this.state.modalVisible);
-        array.push(account.title)
     }
 
     render() {
@@ -168,7 +127,7 @@ export class AddTransactionScreen extends React.Component {
                     ><Text style={styles.centerHeaderText}>Операция</Text></TouchableOpacity>
                     <TouchableOpacity style={styles.rightHeader} onPress={this.saveInfo_3}><Text style={styles.rightHeaderText}>Сохранить</Text></TouchableOpacity>
                 </View>
-                <TouchableOpacity onPress={this.display}><Text>отображаем {this.state.notes.map(this.eachNote)}</Text></TouchableOpacity>
+
                 <View style={styles.menu}>
                     {this.state.activeLeft ? <TouchableOpacity style={styles.leftMenu}
                         onPress={() => {
@@ -245,7 +204,7 @@ export class AddTransactionScreen extends React.Component {
                             date={this.state.date}
                             mode="datetime"
                             showIcon={false}
-                            placeholder="Select date"
+                            placeholder="Выберите дату"
                             format="DD-MM-YYYY "
                             minDate="2019-01-01"
                             maxDate="2030-12-31"
@@ -257,7 +216,7 @@ export class AddTransactionScreen extends React.Component {
                                         position: 'absolute',
                                         left: 0,
                                         top: 4,
-                                        marginLeft: 0
+                                        marginLeft: 0,
                                     },
                                     dateInput: {
                                         paddingTop: 0,
@@ -265,10 +224,17 @@ export class AddTransactionScreen extends React.Component {
                                         borderWidth: 0,
                                         borderColor: 'black',
                                         opacity: 2,
+
                                     },
                                     dateText: {
                                         fontSize: 16,
-                                        marginTop: -8,
+                                        marginTop: -3,
+                                        marginLeft: -50
+                                    },
+                                    placeholderText: {
+                                        fontSize: 17,
+                                        marginLeft: -22
+
                                     }
                                 }
                             }
@@ -349,32 +315,6 @@ export class AddTransactionScreen extends React.Component {
         );
     }
 }
-
-const array = [
-
-];
-
-let list = {
-    id: 2,
-    title: "Тинькофф",
-    balance: 500000,
-    description: "bal",
-    currency: 1,
-    symbol: "руб",
-    rate: 1,
-    position: 0,
-    date: 2578064113,
-    transactions: [
-        {
-            "id": 4,
-            "title": "Яндекс.Деньги",
-            "amount": 34015,
-            "description": "bla bla bla",
-            "category": 2,
-            "date": 1578098713
-        }
-    ]
-};
 
 
 const styles = StyleSheet.create({
@@ -640,6 +580,7 @@ const styles = StyleSheet.create({
         width: 20,
         height: 20
     },
+
 
 })
 

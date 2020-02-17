@@ -25,7 +25,7 @@ export class DetailScreen extends React.Component {
 
     }
     componentDidMount() {
-
+//this.joinData()
         this.setState({
             loading: false,
 
@@ -73,7 +73,6 @@ export class DetailScreen extends React.Component {
             parsed.amount = parseInt(parsed.amount, 10);
 
             this.state.datam.push({ title: parsed.title, date: parsed.date, amount: parsed.amount, category: parsed.category, description: parsed.description, id: this.state.datam.length + 1 })
-            parsed.amount=null
             this.setState({
                 datam: [...this.state.datam],
             })
@@ -102,19 +101,13 @@ export class DetailScreen extends React.Component {
             let parsed = JSON.parse(trans)
             let p = parsed.id - 1
             this.state.datam[p].title = parsed.title
-            //  this.state.datam[p].amount = '-' + this.state.datam[p].amount
             this.state.datam[p].amount = parseFloat(parsed.amount, 10) * 100;
-            // this.state.datam[p].amount = parsed.amount;
             this.state.datam[p].description = parsed.description
-            //  this.state.datam[p].category = parsed.category
-            //let z=parsed.category
             this.state.datam[p].category = parsed.category
-
             var myDate = parsed.date.toString();     // date
             myDate = myDate.split("-");
             var newDate = myDate[1] + "/" + myDate[0] + "/" + myDate[2];
             this.state.datam[p].date = new Date(newDate).getTime() / 1000
-            //  this.state.datam[p].date = parsed.date
 
             this.setState({
                 // data: JSON.parse(data),
@@ -149,7 +142,7 @@ export class DetailScreen extends React.Component {
                     <View style={styles.centerHeader}
                     ><Text style={styles.centerHeaderText}>{this.props.navigation.getParam('title')}</Text></View>
                 </View>
-                <TouchableOpacity onPress={this.joinData}><Text>Adder</Text></TouchableOpacity>
+
 
                 <FlatList
                     data={this.props.navigation.getParam('transactions')}
@@ -190,7 +183,7 @@ export class DetailScreen extends React.Component {
 
                                             {this.state.categories.filter(f => f.id === item.category)[0].title}   </Text>}
 
-                                        {/* {item.category} </Text>}*/}
+                                        {/*  {item.category} </Text>}*/}
 
                                     </View>
                                 </View>
