@@ -1,12 +1,9 @@
 import React from 'react';
-import { Button, Text, Image, View, TextInput, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
-import { light as lightTheme, mapping } from '@eva-design/eva';
-import AsyncStorage from '@react-native-community/async-storage';
-import accounts from "../data/accounts.json"
-import categories from "../data/categories.json"
+import { Text, Image, View, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import Moment from 'react-moment';
-import AddTransactionScreen from './AddTransactionScreen'
-import Storage from '../helpers/Storage'
+import { Utils, Storage } from '../helpers/Index'
+import AsyncStorage from '@react-native-community/async-storage'
+import { AddTransactionScreen } from './AddTransactionScreen';
 
 
 
@@ -15,82 +12,148 @@ export class DetailScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            accounts: accounts,
-            categories: categories,
+            categories: this.props.navigation.getParam('categories'),
+            data: this.props.navigation.getParam('data'),
+            loading: true,
             datam: this.props.navigation.getParam('transactions'),
-            category: this.props.navigation.getParam('category'),
             description: this.props.navigation.getParam('description'),
+            // category: this.props.navigation.getParam('category'),
             title: this.props.navigation.getParam('title'),
             id: this.props.navigation.getParam('id'),
-            id: this.props.navigation.getParam('activeLeft'),
+            balance: this.props.navigation.getParam('balance'),
         }
-        alert('Detail screen')
-    }
 
+    }
     componentDidMount() {
 
         this.setState({
-            title: this.state.title
+            loading: false,
+
         })
 
-
     }
 
-    timestampToDate(ts) {
-        var d = new Date();
-        d.setTime(ts * 1000);
-        return ('0' + d.getDate()).slice(-2) + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + d.getFullYear();
-    }
-    balanceSum_2(transactions) {
-        var sum = 0;
-        for (var i = 0; i < transactions.length; i++) {
-            sum += transactions[i].amount
+
+
+
+    saveInfo_2 = () => {
+        let o = this.state.datam.length
+        let obj_2 = {
+            balance: Utils.balanceSum_3(this.props.navigation.getParam('transactions'))[o - 1],
+            id: this.state.data.id,
+            title: this.state.title
         }
-        return sum / 100
+        let y = parseInt(this.state.balance / 100)
+        AsyncStorage.setItem('counter', JSON.stringify(obj_2));
+
+
     }
 
 
-    displayInfo = async () => {
-
+    displayInfo_3 = async () => {
         try {
-            let trans = await AsyncStorage.getItem('trans');
-            let parsed = JSON.parse(trans);
+            let adder = await AsyncStorage.getItem('adder')
+            let parsed = JSON.parse(adder)
+            //  this.state.datam.push(parsed.title)
+            alert(parsed.title)
+        }
+        catch (error) {
+            alert(error)
+        }
+    }
+
+    joinData = async (title) => {
+        try {
+            let adder = await AsyncStorage.getItem('adder')
+            let parsed = JSON.parse(adder)
+            var myDate = parsed.date.toString();     // date
+            myDate = myDate.split("-");
+            var newDate = myDate[1] + "/" + myDate[0] + "/" + myDate[2];
+            parsed.date = new Date(newDate).getTime() / 1000
+            parsed.amount = parseInt(parsed.amount, 10);
+
+            this.state.datam.push({ title: parsed.title, date: parsed.date, amount: parsed.amount, category: parsed.category, description: parsed.description, id: this.state.datam.length + 1 })
+            parsed.amount=null
+            this.setState({
+                datam: [...this.state.datam],
+            })
+        }
+        catch (error) {
+            alert(error)
+        }
+    }
+
+
+    displayInfo_2 = async () => {
+        try {
+            let counter = await AsyncStorage.getItem('counter')
+            let parsed = JSON.parse(counter)
+            let o = this.state.datam.length
+        }
+        catch (error) {
+            alert(error)
+        }
+    }
+
+    displayInfo = async (data) => {
+        try {
+            let data = await AsyncStorage.getItem('data')
+            let trans = await AsyncStorage.getItem('trans')
+            let parsed = JSON.parse(trans)
             let p = parsed.id - 1
             this.state.datam[p].title = parsed.title
-           // this.state.datam[p].amount = '-' + this.state.datam[p].amount
-            this.state.datam[p].amount = parseInt(parsed.amount, 10);
+            //  this.state.datam[p].amount = '-' + this.state.datam[p].amount
+            this.state.datam[p].amount = parseFloat(parsed.amount, 10) * 100;
+            // this.state.datam[p].amount = parsed.amount;
             this.state.datam[p].description = parsed.description
-            // this.state.datam[p].date = parsed.date
-            this.setState({
-                title: parsed.title,
-                //  date:parsed.date
+            //  this.state.datam[p].category = parsed.category
+            //let z=parsed.category
+            this.state.datam[p].category = parsed.category
 
+            var myDate = parsed.date.toString();     // date
+            myDate = myDate.split("-");
+            var newDate = myDate[1] + "/" + myDate[0] + "/" + myDate[2];
+            this.state.datam[p].date = new Date(newDate).getTime() / 1000
+            //  this.state.datam[p].date = parsed.date
+
+            this.setState({
+                // data: JSON.parse(data),
+                title: parsed.title,
+                amount: parseFloat(parsed.amount, 10) * 100
             })
-            alert()
         }
-        catch{
+        catch (error) {
             alert(error)
         }
     }
 
     render() {
+        this.displayInfo()
+        this.saveInfo_2()
+
+        if (this.state.loading)
+            return <ActivityIndicator />
+
         return (
             <View style={styles.container}>
                 <View style={styles.header}>
                     <TouchableOpacity style={styles.leftHeader}
-                        //  onPress={() => {
-                        //    this.props.navigation.navigate('Home')
-                        //}}
-                        onPress={this.displayInfo}
+                        onPress={() => {
+                            this.props.navigation.navigate('Home')
+                        }}
                     ><Image source={require('../assets/image/back.png')} style={styles.back}
                         />
                         <Text style={styles.leftHeaderText}>Cчета</Text></TouchableOpacity>
-                    <View style={styles.centerHeader}><Text style={styles.centerHeaderText}>{this.props.navigation.getParam('title')}</Text></View>
+
+
+                    <View style={styles.centerHeader}
+                    ><Text style={styles.centerHeaderText}>{this.props.navigation.getParam('title')}</Text></View>
                 </View>
+                <TouchableOpacity onPress={this.joinData}><Text>Adder</Text></TouchableOpacity>
+
                 <FlatList
-                    // data={this.state.accounts[0].transactions}
                     data={this.props.navigation.getParam('transactions')}
-                    extraData={this.state}
+                    extraData={this.state.datam}
                     style={styles.list}
 
                     renderItem={({ item }) => (
@@ -105,10 +168,13 @@ export class DetailScreen extends React.Component {
                                         amount: item.amount,
                                         title: item.title,
                                         id: item.id,
+                                        categories: this.props.navigation.getParam('categories'),
                                         description: item.description,
+                                        // category: typeof item.category=='string' ? item.category : item.category,
                                         // category:item.category,
-                                        category: this.state.categories.filter(f => f.id === item.category)[0].title,
-                                        date: this.timestampToDate(item.date),
+                                        // category: this.state.categories.filter(f => f.id === item.category)[0].title,
+                                        category: this.state.categories.filter(f => f.id === item.category)[0].id,
+                                        date: Utils.timestampToDate(item.date)
                                     })
                                 }}>
                                 <View>
@@ -118,8 +184,13 @@ export class DetailScreen extends React.Component {
                                         <Text style={styles.listTitle} numberOfLines={1}>{' ' + ' ' + '<' + item.title + '>'}</Text>
                                     </View>
                                     <View>
-                                        <Text style={styles.listTitle_2}
-                                        >{this.state.categories.filter(f => f.id === item.category)[0].title}</Text>
+                                        {<Text style={styles.listTitle_2} >
+
+                                            {/*      {typeof item.category=='string' ? item.category:item.category}   </Text>}      */}
+
+                                            {this.state.categories.filter(f => f.id === item.category)[0].title}   </Text>}
+
+                                        {/* {item.category} </Text>}*/}
 
                                     </View>
                                 </View>
@@ -132,22 +203,31 @@ export class DetailScreen extends React.Component {
                                     </View>}
                                     <Image source={require('../assets/image/forward.png')} style={styles.forward} />
                                 </View>
-                                <View><Text style={styles.balance}>{this.props.navigation.getParam('balance') / 100 + " " + "₽"}
+                                <View><Text style={styles.balance}>
+                                    {/*  {Math.round(this.props.navigation.getParam('balance') / 100 + item.amount / 100)
+                                        + " " + "₽"}*/}
+                                    {Utils.balanceSum_3(this.props.navigation.getParam('transactions'))[item.id - 1] + " " + "₽"}
+
                                 </Text>
                                 </View>
                             </View>
-
-
                         </View>
                     )}
                     keyExtractor={(item, index) => index.toString()} />
+
                 <View style={styles.keller}>
-                    <Text style={styles.kellerText}>Текущий баланс {this.balanceSum_2(this.props.navigation.getParam('transactions')) + " " + "₽"}</Text>
+                    <Text style={styles.kellerText}>Текущий баланс {Utils.balanceSum_3(this.props.navigation.getParam('transactions'))[this.state.datam.length - 1] + " " + "₽"} </Text>
+
+                    {/*    <Text style={styles.kellerText}>Текущий баланс {Utils.balanceSum_2(this.props.navigation.getParam('transactions')) +
+                        this.props.navigation.getParam('balance') / 100 + " " + "₽"}</Text>*/}
                 </View>
             </View >
         );
     }
 }
+
+
+
 const styles = StyleSheet.create({
     container: {
         flex: 1
@@ -264,5 +344,3 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
     }
 })
-
-

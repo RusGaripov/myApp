@@ -1,52 +1,152 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { Modal, Text, View, TextInput, StyleSheet, Image, FlatList, TouchableOpacity } from 'react-native';
-import accounts from "../data/accounts.json"
-import categories from "../data/categories.json"
-import Moment from 'react-moment';
 import ModalExample from '../components/Picker';
-//import ModalForAccounts from '../components/Picker_Accounts';
 import MyDatePicker from '../components/DatePicker'
+import DatePicker from 'react-native-datepicker'
+import { Storage } from '../helpers/Index'
+import AsyncStorage from '@react-native-community/async-storage'
 
 
 export class AddTransactionScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            list: list,
-            accounts: accounts,
-            categories: categories,
-            title: list.id,
-            amount: accounts[0].transactions[0].amount,
-            description: accounts[0].transactions[0].description,
-            category: null,
+            data: this.props.navigation.getParam('data'),
+            datam: this.props.navigation.getParam('transactions'),
+            date: this.props.navigation.getParam('date'),
+            description: this.props.navigation.getParam('description'),
+            category: this.props.navigation.getParam('category'),
+            amount: this.props.navigation.getParam('amount'),
+            text_2: this.props.navigation.getParam('description'),
+            text: Math.abs(this.props.navigation.getParam('amount') / 100) + ' ' + "₽",
+            title: 'Выберите счет',
+            // category: null,
             activeLeft: true,
             activeCenter: false,
             activeRight: false,
             selectField: 'Справа',
             modalVisible: false,
             selectedItemId: 0,
-            modalVisible: false,
-            id: props.id,
-            selectedItemId: 0
+            notes: [
+                {
+                    id: 0,
+                    title: 'rococo'
+                },
+                {
+                    id: 1,
+                    title: 'bumbaramba'
+                },
+            ]
         }
     }
+
     componentDidMount() {
-        const category = this.state.categories.filter(f => f.id === this.state.accounts[0].transactions[0].category)[0].title
-        this.setState({ category })
+        Storage.get('data', (data) => {
+            this.setState({
+                loading: false,
+                data: JSON.parse(data)
+            })
+        })
+        Storage.get('categories', (categories) => {
+            this.setState({
+                loading: false,
+                categories: JSON.parse(categories)
+            })
+        })
     }
+
+    addItemQuantity = (title, id, account) => {
+        //    alert(category)
+        alert(title)
+        this.setState({
+            category: title
+        })
+
+    };
+
+
+
+
+    saveInfo_3 = async () => {
+        const { title, balance, id, date, category, description, activeLeft, categories } = this.state
+        let obj_3
+        if (activeLeft) {
+            // this.state.text =
+            obj_3 = {
+                id: id,
+                title: title,
+                //  amount:parseInt((-this.state.text), 10)*100,
+                amount: 1,
+                description: 'Х',
+                category: 'Фига',
+               // date: 0,
+                categories: categories,
+
+            }
+        }
+        else {
+            obj_3 = {
+                id: id,
+                title: title,
+                amount: this.state.text,
+                //   amount: parseInt(this.state.text, 10)*100,
+                description: this.state.text_2,
+                category: category,
+                date: date,
+                categories: categories,
+            }
+
+            await AsyncStorage.setItem('adder', JSON.stringify(obj_3));
+        }
+
+    }
+
+    displayInfo_3 = async () => {
+        try {
+            let adder = await AsyncStorage.getItem('adder')
+            let parsed = JSON.parse(adder)
+            this.state.description=parsed.description
+            this.setState({
+                // data: JSON.parse(data),
+                description: parsed.description
+            })
+            alert(parsed.description)
+        }
+        catch (error) {
+            alert(error)
+        }
+    }
+
+
+
+
+
+
+
+
     setModalVisible(visible) {
         this.setState({ modalVisible: visible });
     }
 
-    addData = () => {
-        this.props.accounts.push({
-            description: this.state.description,
-            category: this.state.category,
-            title: this.state.title,
-            amount: this.state.amount,
-            date: this.state.date
-        });
+
+    eachNote(title) {
+        return (
+            <Text>{title.title}</Text>
+        )
     }
+
+    check = () => {
+        alert(o)
+    }
+
+    nextId = () => {
+        this.uniqueId = this.uniqueId || 0
+        return this.uniqueId
+    }
+
+
+
+
     _onPress(account) {
         this.setState({ title: account.title, selectedItemId: account.id });
         this.setModalVisible(!this.state.modalVisible);
@@ -59,15 +159,16 @@ export class AddTransactionScreen extends React.Component {
                 <View style={styles.header}>
                     <TouchableOpacity style={styles.leftHeader}
                         onPress={() => {
-                            this.props.navigation.navigate('Detail'), {
-                                text: 'Hello from screen 1'
-                            }
+                            this.props.navigation.navigate('Home')
                         }}
                     ><Text style={styles.leftHeaderText}>Отменить</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.centerHeader}><Text style={styles.centerHeaderText}>Операция</Text></TouchableOpacity>
-                    <TouchableOpacity style={styles.rightHeader} onPress={this.appData}><Text style={styles.rightHeaderText}>Сохранить</Text></TouchableOpacity>
+                    <TouchableOpacity style={styles.centerHeader}
+                        onPress={this.displayInfo_3}
+                    ><Text style={styles.centerHeaderText}>Операция</Text></TouchableOpacity>
+                    <TouchableOpacity style={styles.rightHeader} onPress={this.saveInfo_3}><Text style={styles.rightHeaderText}>Сохранить</Text></TouchableOpacity>
                 </View>
+                <TouchableOpacity onPress={this.display}><Text>отображаем {this.state.notes.map(this.eachNote)}</Text></TouchableOpacity>
                 <View style={styles.menu}>
                     {this.state.activeLeft ? <TouchableOpacity style={styles.leftMenu}
                         onPress={() => {
@@ -116,10 +217,7 @@ export class AddTransactionScreen extends React.Component {
                             this.setModalVisible(true);
                         }}
                     >
-                        {/*    <ModalForAccounts title={'Перевод'} selectField={'Справа'} />
 
-                        <ModalForAccounts selectField='Справа' />*/}
-                        {/*<Text style={styles.rightMenuText}>Перевод</Text>*/}
                         <Text style={styles.rightMenuText}>Перевод</Text>
                     </TouchableOpacity>
 
@@ -127,9 +225,7 @@ export class AddTransactionScreen extends React.Component {
                             onPress={() => {
                                 this.setModalVisible(true);
                             }}
-                        >{/*<Text style={styles.rightMenuText_2}>Перевод</Text>*/}
-                            {/*    <ModalForAccounts title={'Перевод'} selectField={'Справа'} callback={(data) => { }} />
-                            <ModalForAccounts selectField='Справа' />*/}
+                        >
                             <Text style={styles.rightMenuText_2}>Перевод</Text>
                         </TouchableOpacity>}
                 </View>
@@ -144,16 +240,41 @@ export class AddTransactionScreen extends React.Component {
                     </View>
 
                     <View style={styles.secondColumnStyle}>
-                        {/*   <Moment format="DD.MM.YYYY" style={styles.listTitle_2} element={Text} unix>{this.state.accounts[0].transactions[0].date}</Moment>*/}
-
-                        <View>
-                            <MyDatePicker />
-                        </View>
-
-                        {/*<TextInput style={styles.listTitle_2} value={this.state.title} />*/}
+                        <DatePicker
+                            style={styles.datepicker}
+                            date={this.state.date}
+                            mode="datetime"
+                            showIcon={false}
+                            placeholder="Select date"
+                            format="DD-MM-YYYY "
+                            minDate="2019-01-01"
+                            maxDate="2030-12-31"
+                            confirmBtnText="Confirm"
+                            cancelBtnText="Cancel"
+                            customStyles={
+                                {
+                                    dateIcon: {
+                                        position: 'absolute',
+                                        left: 0,
+                                        top: 4,
+                                        marginLeft: 0
+                                    },
+                                    dateInput: {
+                                        paddingTop: 0,
+                                        marginLeft: 0,
+                                        borderWidth: 0,
+                                        borderColor: 'black',
+                                        opacity: 2,
+                                    },
+                                    dateText: {
+                                        fontSize: 16,
+                                        marginTop: -8,
+                                    }
+                                }
+                            }
+                            onDateChange={(date) => { this.setState({ date: date }) }}
+                        />
                         <View style={styles.listTitle_3}>
-                            {/*    <ModalForAccounts title={'Наличные'} selectField={'Центр'} callback={(data) => { }} />
-                            <ModalForAccounts selectField='Центр' title={this.state.title}/>*/}
                             <TouchableOpacity
                                 onPress={() => {
                                     this.setModalVisible(true);
@@ -164,14 +285,15 @@ export class AddTransactionScreen extends React.Component {
                         </View>
 
                         <View style={styles.listTitle_3}>
-                            <ModalExample title={'Выбрать категорию'} selectField={'Центр'} callback={(data) => { }} />
+                            <ModalExample category={this.state.account} title={'Выбрать категорию'} selectField={'Центр'} addItemQuantityPress={this.addItemQuantity} />
                         </View>
-                        {/*  <Text style={styles.listTitle_2}
-                        >{this.state.categories.filter(f => f.id === this.state.accounts[0].transactions[0].category)[0].title}</Text>*/}
                         <TextInput style={styles.listTitle_2} placeholder='Введите описание'
+                            onChangeText={(text_2) => this.setState({ text_2 })}
                         />
-                        {!this.state.activeCenter ? <TextInput style={styles.listTitle_2} placeholder="Введите сумму" />
-                            : <TextInput style={styles.listTitle_2_green} placeholder="Введите сумму" />}
+                        {!this.state.activeCenter ? <TextInput style={styles.listTitle_2} placeholder="Введите сумму"
+                            onChangeText={(text) => this.setState({ text })} />
+                            : <TextInput style={styles.listTitle_2_green} placeholder="Введите сумму"
+                                onChangeText={(text) => this.setState({ text })} />}
                     </View>
                     <View style={styles.forwardContainer}>
                         <Image source={require('../assets/image/forward.png')} style={styles.forward} />
@@ -253,11 +375,6 @@ let list = {
         }
     ]
 };
-
-
-
-
-
 
 
 const styles = StyleSheet.create({
@@ -396,6 +513,7 @@ const styles = StyleSheet.create({
 
     },
     secondColumnStyle: {
+        paddingTop: 8,
         paddingLeft: 30,
         flexDirection: "column",
     },
@@ -521,9 +639,7 @@ const styles = StyleSheet.create({
     check: {
         width: 20,
         height: 20
-    }
-
-
+    },
 
 })
 
@@ -554,4 +670,3 @@ const DATA = [
     },
 
 ];
-

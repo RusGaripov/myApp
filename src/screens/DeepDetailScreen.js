@@ -1,29 +1,20 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { Modal, Text, View, TextInput, StyleSheet, Image, FlatList, TouchableOpacity } from 'react-native';
-import accounts from "../data/accounts.json"
-import categories from "../data/categories.json"
-import Moment from 'react-moment';
 import ModalExample from '../components/Picker';
-//import ModalForAccounts from '../components/Picker_Accounts';
-import MyDatePicker from '../components/DatePicker'
 import DatePicker from 'react-native-datepicker'
-import { AsyncStorage } from 'react-native';
-//import AsyncStorage from '@react-native-community/async-storage';
-import { resetTo } from '../helpers/Screens'
-
-
-
+import AsyncStorage from '@react-native-community/async-storage'
 
 export class DeepDetailScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            accounts: accounts,
-            categories: categories,
-            title: this.props.navigation.getParam('title'),
             data: this.props.navigation.getParam('data'),
+            loading: true,
+            categories: this.props.navigation.getParam('categories'),
+            date: this.props.navigation.getParam('date'),
+            title: this.props.navigation.getParam('title'),
             id: this.props.navigation.getParam('id'),
-            amount: this.props.navigation.getParam('amount'),
+            //   amount: this.props.navigation.getParam('amount'),
             description: this.props.navigation.getParam('description'),
             category: this.props.navigation.getParam('category'),
             activeLeft: true,
@@ -31,79 +22,80 @@ export class DeepDetailScreen extends React.Component {
             activeRight: false,
             selectField: 'Справа',
             modalVisible: false,
-            selectedItemId: 0,
-            modalVisible: false,
-            selectedItemId: 0,
-            date: this.props.navigation.getParam('date'),
-            text: this.props.navigation.getParam('amount') / 100 + ' ' + "₽",
+            text: Math.abs(this.props.navigation.getParam('amount') / 100) + ' ' + "₽",
             text_2: this.props.navigation.getParam('description'),
-           
+            id_2: null
         }
-    }
-    componentDidMount() {
-        const category = this.state.categories.filter(f => f.id === this.state.accounts[0].transactions[0].category)[0].title
-
-        this.setState({ category })
-
+        //   alert(this.state.categories[0].title)
     }
 
 
-
-    
-    addItemQuantity = (title, category, account) => {
-    //    alert(category)
-        //alert(title)
+    addItemQuantity = (title, id, account) => {
+        //    alert(category)
+        //    alert(title)
         this.setState({
-           category:title
-       })
-    
-   };
+            category: title
+        })
+
+    };
 
 
     saveInfo = () => {
-        const { title, amount, id, description, category, date, activeLeft } = this.state
+        const { title, balance, id, date, category, description, activeLeft, text, categories } = this.state
+
         let obj
-        if (activeLeft)
+
+        if (activeLeft) {
+            // this.state.text =
             obj = {
                 id: id,
                 title: title,
-                amount: '-' + this.state.text,
+                //  amount:parseInt((-this.state.text), 10)*100,
+                amount: '-'+this.state.text,
                 description: this.state.text_2,
                 category: category,
                 date: date,
                 categories: categories,
+
             }
+        }
         else {
             obj = {
                 id: id,
                 title: title,
                 amount: this.state.text,
+                //   amount: parseInt(this.state.text, 10)*100,
                 description: this.state.text_2,
                 category: category,
                 date: date,
                 categories: categories,
             }
+
+
         }
-        AsyncStorage.setItem('trans', JSON.stringify(obj), (callback) => {
-            // this.props.navigation.navigate('Detail');
-        })
 
 
-
+        AsyncStorage.setItem('trans', JSON.stringify(obj));
     }
 
-
     displayInfo = async () => {
-
         try {
-            let trans = await AsyncStorage.getItem('trans');
-            let parsed = JSON.parse(trans);
-            alert(this.state.category)
+            let trans = await AsyncStorage.getItem('trans')
+            let parsed = JSON.parse(trans)
+            //    alert(parsed.category)
         }
-        catch{
+        catch (error) {
             alert(error)
         }
     }
+    setModalVisible(visible) {
+        this.setState({ modalVisible: visible });
+    }
+    _onPress(account) {
+        this.setState({ title: account.title, selectedItemId: account.id, amount: this.state.text });
+        this.setModalVisible(!this.state.modalVisible);
+    }
+
 
 
     render() {
@@ -161,6 +153,7 @@ export class DeepDetailScreen extends React.Component {
                                     activeLeft: false,
                                     activeRight: false,
                                     activeCenter: true,
+                                    text: 'ddddd'
                                 })
                             }}
                         ><Text style={styles.centerMenuText_2}>Поступление</Text></TouchableOpacity>}
@@ -171,10 +164,6 @@ export class DeepDetailScreen extends React.Component {
                             this.setModalVisible(true);
                         }}
                     >
-                        {/*    <ModalForAccounts title={'Перевод'} selectField={'Справа'} />
-
-                        <ModalForAccounts selectField='Справа' />*/}
-                        {/*<Text style={styles.rightMenuText}>Перевод</Text>*/}
                         <Text style={styles.rightMenuText}>Перевод</Text>
                     </TouchableOpacity>
 
@@ -182,9 +171,7 @@ export class DeepDetailScreen extends React.Component {
                             onPress={() => {
                                 this.setModalVisible(true);
                             }}
-                        >{/*<Text style={styles.rightMenuText_2}>Перевод</Text>*/}
-                            {/*    <ModalForAccounts title={'Перевод'} selectField={'Справа'} callback={(data) => { }} />
-                            <ModalForAccounts selectField='Справа' />*/}
+                        >
                             <Text style={styles.rightMenuText_2}>Перевод</Text>
                         </TouchableOpacity>}
                 </View>
@@ -199,7 +186,6 @@ export class DeepDetailScreen extends React.Component {
                     </View>
 
                     <View style={styles.secondColumnStyle}>
-                        {/*   <Moment format="DD.MM.YYYY" style={styles.listTitle_2} element={Text} unix>{this.state.accounts[0].transactions[0].date}</Moment>*/}
                         <DatePicker
                             style={styles.datepicker}
                             date={this.state.date}
@@ -230,22 +216,11 @@ export class DeepDetailScreen extends React.Component {
                                         fontSize: 16,
                                         marginTop: -8,
                                     }
-                                    // ... You can check the source to find the other keys.
                                 }
                             }
                             onDateChange={(date) => { this.setState({ date: date }) }}
                         />
-
-
-
-                        {/*  <View>
-                            <MyDatePicker />
-                      </View>*/}
-
-                        {/*<TextInput style={styles.listTitle_2} value={this.state.title} />*/}
                         <View style={styles.listTitle_3}>
-                            {/*    <ModalForAccounts title={'Наличные'} selectField={'Центр'} callback={(data) => { }} />
-                            <ModalForAccounts selectField='Центр' title={this.state.title}/>*/}
                             <TouchableOpacity
                                 onPress={() => {
                                     this.setModalVisible(true);
@@ -256,10 +231,9 @@ export class DeepDetailScreen extends React.Component {
                         </View>
 
                         <View style={styles.listTitle_3}>
-                            <ModalExample title={this.state.category} selectField={'Центр'}  addItemQuantityPress={this.addItemQuantity} />
+                            <ModalExample
+                                title={this.state.categories[this.state.category - 1].title} selectField={'Центр'} addItemQuantityPress={this.addItemQuantity} />
                         </View>
-                        {/*  <Text style={styles.listTitle_2}
-                        >{this.state.categories.filter(f => f.id === this.state.accounts[0].transactions[0].category)[0].title}</Text>*/}
                         <TextInput style={styles.listTitle_2} onChangeText={(text_2) => this.setState({ text_2 })} value={this.state.text_2} />
                         {!this.state.activeCenter ? <TextInput style={styles.listTitle_2} onChangeText={(text) => this.setState({ text })} value={this.state.text} />
                             : <TextInput style={styles.listTitle_2_green} onChangeText={(text) => this.setState({ text })} value={this.state.text} />}
@@ -318,12 +292,6 @@ export class DeepDetailScreen extends React.Component {
         );
     }
 }
-
-
-
-
-
-
 
 
 
@@ -622,4 +590,3 @@ const DATA = [
     },
 
 ];
-

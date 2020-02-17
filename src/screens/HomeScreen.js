@@ -5,43 +5,80 @@ import {
     StyleSheet,
     FlatList,
     Text,
-    TouchableOpacity
+    TouchableOpacity,
+    ActivityIndicator
 } from 'react-native';
-import accounts from "../data/accounts.json"
-import { Button } from 'react-native-ui-kitten';
-import AsyncStorage from '@react-native-community/async-storage';
-import Storage from '../assets/storage/Storage'
+import { Storage, Utils } from '../helpers/Index';
+import AsyncStorage from '@react-native-community/async-storage'
 
 
 export class HomeScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            accounts: accounts,
+            data: null,
+            loading: true,
+            categories:null,
+            category:null
         }
+        
     }
 
-    balanceSum(accounts) {
-        var sum = 0;
-        for (var i = 0; i < accounts.length; i++) {
-            sum += accounts[i].balance
-        }
-        return sum / 100
+
+
+    componentDidMount() {
+        Storage.get('data', (data) => {
+       // alert(data.transactions[0].category)
+            this.setState({
+                loading: false,
+                data: JSON.parse(data),
+              //  category:JSON.parse(category)
+            })
+        })
+
+        Storage.get('categories', (data) => {
+          
+            this.setState({
+                loading: false,
+                categories: JSON.parse(data),
+            })
+        })
     }
-    
-   
 
 
+    displayInfo_2 =async () => {
+        try {
+            let counter = await AsyncStorage.getItem('counter')
+            let parsed = JSON.parse(counter)
+            let p = parsed.id - 1
+            this.state.data[p].balance = Math.round(parsed.balance)*100,
+
+                this.setState({
+                 //   data: JSON.parse(data),
+                    balance: parsed.balance,
+
+                })
+        }
+        catch (error) {
+           // alert(error)
+        }
+    }
 
     render() {
+          this.displayInfo_2()
+
+        if (this.state.loading)
+            return <ActivityIndicator />
         return (
             <View style={styles.container}>
                 <View style={styles.header}>
                     <TouchableOpacity style={styles.leftHeader}><Text style={styles.leftHeaderText}>Править</Text></TouchableOpacity>
-                    <TouchableOpacity style={styles.centerHeader}><Text style={styles.centerHeaderText}>Счета</Text></TouchableOpacity>
+                    <TouchableOpacity style={styles.centerHeader}
+                        onPress={this.displayInfo_2} ><Text style={styles.centerHeaderText}>Счета</Text></TouchableOpacity>
+
                 </View>
                 <FlatList
-                    data={this.state.accounts}
+                    data={this.state.data}
 
                     renderItem={({ item }) => (
                         <View
@@ -54,11 +91,12 @@ export class HomeScreen extends React.Component {
                                             data: item,
                                             amount: item.amount,
                                             title: item.title,
+                                            categories:this.state.categories,
                                             description: item.description,
+                                           // category: item.transactionsх,
                                             transactions: item.transactions,
-                                            category:item.category,
                                             balance: item.balance,
-                                            title:item.title
+                                            id: item.id
                                         })
                                     }}
                                 >{item.title}</Text>
@@ -68,7 +106,6 @@ export class HomeScreen extends React.Component {
                                     : <View style={styles.thirdColumnStyle}><Text style={styles.sumStyle_2}>{Math.abs(item.balance / 100) + " " + "₽"}</Text>
                                     </View>}
                                 <TouchableOpacity
-                                    //    style={styles.secondColumnStyle}
                                     onPress={() => {
                                         this.props.navigation.navigate('AddTransaction')
                                     }}>
@@ -80,15 +117,12 @@ export class HomeScreen extends React.Component {
                     )}
                     keyExtractor={(item, index) => index.toString()} />
                 <View style={styles.keller}>
-                    <Text style={styles.kellerText}>Текущий баланс {this.balanceSum(this.state.accounts) + " " + "₽"}</Text>
+                    <Text style={styles.kellerText}>Текущий баланс {Utils.balanceSum(this.state.data) + " " + "₽"}</Text>
                 </View>
             </View>
-
         );
     }
 }
-
-
 
 const styles = StyleSheet.create({
     container: {
