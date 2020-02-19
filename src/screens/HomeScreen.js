@@ -18,26 +18,26 @@ export class HomeScreen extends React.Component {
         this.state = {
             data: null,
             loading: true,
-            categories:null,
-            category:null
+            categories: null,
+            category: null
         }
-        
+
     }
 
 
 
     componentDidMount() {
         Storage.get('data', (data) => {
-       // alert(data.transactions[0].category)
+            // alert(data.transactions[0].category)
             this.setState({
                 loading: false,
                 data: JSON.parse(data),
-              //  category:JSON.parse(category)
+                //  category:JSON.parse(category)
             })
         })
 
         Storage.get('categories', (data) => {
-          
+
             this.setState({
                 loading: false,
                 categories: JSON.parse(data),
@@ -46,26 +46,26 @@ export class HomeScreen extends React.Component {
     }
 
 
-    displayInfo_2 =async () => {
+    displayInfo_2 = async () => {
         try {
             let counter = await AsyncStorage.getItem('counter')
             let parsed = JSON.parse(counter)
             let p = parsed.id - 1
-            this.state.data[p].balance = Math.round(parsed.balance)*100,
+            this.state.data[p].balance = Math.round(parsed.balance) * 100,
 
                 this.setState({
-                 //   data: JSON.parse(data),
+                    //   data: JSON.parse(data),
                     balance: parsed.balance,
 
                 })
         }
         catch (error) {
-           // alert(error)
+            // alert(error)
         }
     }
 
     render() {
-          this.displayInfo_2()
+        this.displayInfo_2()
 
         if (this.state.loading)
             return <ActivityIndicator />
@@ -91,9 +91,9 @@ export class HomeScreen extends React.Component {
                                             data: item,
                                             amount: item.amount,
                                             title: item.title,
-                                            categories:this.state.categories,
+                                            categories: this.state.categories,
                                             description: item.description,
-                                           // category: item.transactionsх,
+                                            // category: item.transactionsх,
                                             transactions: item.transactions,
                                             balance: item.balance,
                                             id: item.id
@@ -107,7 +107,17 @@ export class HomeScreen extends React.Component {
                                     </View>}
                                 <TouchableOpacity
                                     onPress={() => {
-                                        this.props.navigation.navigate('AddTransaction')
+                                        this.props.navigation.navigate('AddTransaction', {
+                                            data: item,
+                                            amount: item.amount,
+                                            title: item.title,
+                                            categories: this.state.categories,
+                                            description: item.description,
+                                            // category: item.transactionsх,
+                                            transactions: item.transactions,
+                                            balance: item.balance,
+                                            id: item.id
+                                        })
                                     }}>
 
                                     <Image source={require('../assets/image/adder.png')} style={styles.plus}
