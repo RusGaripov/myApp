@@ -1,10 +1,8 @@
 import React from 'react';
 import { Text, Image, View, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import Moment from 'react-moment';
-import { Utils, Storage } from '../helpers/Index'
+import { Utils } from '../helpers/Index'
 import AsyncStorage from '@react-native-community/async-storage'
-import { AddTransactionScreen } from './AddTransactionScreen';
-
 
 
 export class DetailScreen extends React.Component {
@@ -14,10 +12,11 @@ export class DetailScreen extends React.Component {
         this.state = {
             categories: this.props.navigation.getParam('categories'),
             data: this.props.navigation.getParam('data'),
+            date: this.props.navigation.getParam('date'),
             loading: true,
             datam: this.props.navigation.getParam('transactions'),
+            transactions: this.props.navigation.getParam('transactions'),
             description: this.props.navigation.getParam('description'),
-            // category: this.props.navigation.getParam('category'),
             title: this.props.navigation.getParam('title'),
             id: this.props.navigation.getParam('id'),
             balance: this.props.navigation.getParam('balance'),
@@ -25,16 +24,11 @@ export class DetailScreen extends React.Component {
 
     }
     componentDidMount() {
-//this.joinData()
+        this.joinData()
         this.setState({
             loading: false,
-
         })
-
     }
-
-
-
 
     saveInfo_2 = () => {
         let o = this.state.datam.length
@@ -45,17 +39,12 @@ export class DetailScreen extends React.Component {
         }
         let y = parseInt(this.state.balance / 100)
         AsyncStorage.setItem('counter', JSON.stringify(obj_2));
-
-
     }
-
 
     displayInfo_3 = async () => {
         try {
             let adder = await AsyncStorage.getItem('adder')
             let parsed = JSON.parse(adder)
-            //  this.state.datam.push(parsed.title)
-            alert(parsed.title)
         }
         catch (error) {
             alert(error)
@@ -72,16 +61,15 @@ export class DetailScreen extends React.Component {
             parsed.date = new Date(newDate).getTime() / 1000
             parsed.amount = parseInt(parsed.amount, 10);
 
-            this.state.datam.push({ title: parsed.title, date: parsed.date, amount: parsed.amount, category: parsed.category, description: parsed.description, id: this.state.datam.length + 1 })
+            this.state.transactions.push({ title: parsed.title, date: parsed.date, amount: parsed.amount, category: parsed.category, description: parsed.description, id: this.state.transactions.length + 1 })
             this.setState({
-                datam: [...this.state.datam],
+                transactions: [...this.state.transactions],
             })
         }
         catch (error) {
             alert(error)
         }
     }
-
 
     displayInfo_2 = async () => {
         try {
@@ -100,17 +88,16 @@ export class DetailScreen extends React.Component {
             let trans = await AsyncStorage.getItem('trans')
             let parsed = JSON.parse(trans)
             let p = parsed.id - 1
-            this.state.datam[p].title = parsed.title
-            this.state.datam[p].amount = parseFloat(parsed.amount, 10) * 100;
-            this.state.datam[p].description = parsed.description
-            this.state.datam[p].category = parsed.category
+            this.state.transactions[p].title = parsed.title
+            this.state.transactions[p].amount = parseFloat(parsed.amount, 10) * 100;
+            this.state.transactions[p].description = parsed.description
+            this.state.transactions[p].category = parsed.category
             var myDate = parsed.date.toString();     // date
             myDate = myDate.split("-");
             var newDate = myDate[1] + "/" + myDate[0] + "/" + myDate[2];
-            this.state.datam[p].date = new Date(newDate).getTime() / 1000
+            this.state.transactions[p].date = new Date(newDate).getTime() / 1000
 
             this.setState({
-                // data: JSON.parse(data),
                 title: parsed.title,
                 amount: parseFloat(parsed.amount, 10) * 100
             })
@@ -120,6 +107,7 @@ export class DetailScreen extends React.Component {
         }
     }
 
+    
     render() {
         this.displayInfo()
         this.saveInfo_2()
@@ -143,33 +131,30 @@ export class DetailScreen extends React.Component {
                     ><Text style={styles.centerHeaderText}>{this.props.navigation.getParam('title')}</Text></View>
                 </View>
 
-
                 <FlatList
                     data={this.props.navigation.getParam('transactions')}
-                    extraData={this.state.datam}
                     style={styles.list}
 
                     renderItem={({ item }) => (
+
+                        <TouchableOpacity
+                        style={styles.listItem}
+                        onPress={() => {
+                            this.props.navigation.navigate('DeepDetail', {
+                                amount: item.amount,
+                                title: item.title,
+                                id: item.id,
+                                categories: this.props.navigation.getParam('categories'),
+                                description: item.description,
+                                category: this.state.categories.filter(f => f.id === item.category)[0].id,
+                                date: Utils.timestampToDate(item.date)
+                            })
+                        }}>
+
                         <View
-                            style={styles.listItem}
+                            style={styles.firstColumnStyle}
                         >
 
-                            <TouchableOpacity
-                                style={styles.firstColumnStyle}
-                                onPress={() => {
-                                    this.props.navigation.navigate('DeepDetail', {
-                                        amount: item.amount,
-                                        title: item.title,
-                                        id: item.id,
-                                        categories: this.props.navigation.getParam('categories'),
-                                        description: item.description,
-                                        // category: typeof item.category=='string' ? item.category : item.category,
-                                        // category:item.category,
-                                        // category: this.state.categories.filter(f => f.id === item.category)[0].title,
-                                        category: this.state.categories.filter(f => f.id === item.category)[0].id,
-                                        date: Utils.timestampToDate(item.date)
-                                    })
-                                }}>
                                 <View>
                                     <View style={styles.subFirstColumn}>
                                         <Moment format="DD.MM.YYYY"
@@ -178,16 +163,10 @@ export class DetailScreen extends React.Component {
                                     </View>
                                     <View>
                                         {<Text style={styles.listTitle_2} >
-
-                                            {/*      {typeof item.category=='string' ? item.category:item.category}   </Text>}      */}
-
                                             {this.state.categories.filter(f => f.id === item.category)[0].title}   </Text>}
-
-                                        {/*  {item.category} </Text>}*/}
-
                                     </View>
                                 </View>
-                            </TouchableOpacity>
+                         
                             <View style={styles.secondColumnStyle}>
                                 <View style={styles.subSecondColumn}>{item.amount / 100 >= 0 ? <View style={styles.thirdColumnStyle}>
                                     <Text style={styles.sumStyle}>{item.amount / 100 + " " + "₽"}</Text></View> :
@@ -197,29 +176,23 @@ export class DetailScreen extends React.Component {
                                     <Image source={require('../assets/image/forward.png')} style={styles.forward} />
                                 </View>
                                 <View><Text style={styles.balance}>
-                                    {/*  {Math.round(this.props.navigation.getParam('balance') / 100 + item.amount / 100)
-                                        + " " + "₽"}*/}
                                     {Utils.balanceSum_3(this.props.navigation.getParam('transactions'))[item.id - 1] + " " + "₽"}
 
                                 </Text>
                                 </View>
                             </View>
                         </View>
+                        </TouchableOpacity>
                     )}
                     keyExtractor={(item, index) => index.toString()} />
 
                 <View style={styles.keller}>
-                    <Text style={styles.kellerText}>Текущий баланс {Utils.balanceSum_3(this.props.navigation.getParam('transactions'))[this.state.datam.length - 1] + " " + "₽"} </Text>
-
-                    {/*    <Text style={styles.kellerText}>Текущий баланс {Utils.balanceSum_2(this.props.navigation.getParam('transactions')) +
-                        this.props.navigation.getParam('balance') / 100 + " " + "₽"}</Text>*/}
+                    <Text style={styles.kellerText}>Текущий баланс {Utils.balanceSum_3(this.props.navigation.getParam('transactions'))[this.state.transactions.length - 1] + " " + "₽"} </Text>
                 </View>
             </View >
         );
     }
 }
-
-
 
 const styles = StyleSheet.create({
     container: {
@@ -262,21 +235,21 @@ const styles = StyleSheet.create({
         fontSize: 18
     },
     listItem: {
-        paddingTop: 30,
-        flexDirection: 'row',
+        flexDirection: 'column',
         flexWrap: 'wrap',
         paddingVertical: 4,
         paddingHorizontal: 4,
-        justifyContent: "space-between"
+       
 
     },
-    firstColumnStyle: {
+    firstColumnStyle: {  
         position: 'relative',
+        flexDirection: 'row',
+        justifyContent: "space-between",
         top: 10,
         paddingTop: 10,
-        alignSelf: "flex-start",
         paddingLeft: 15,
-        width: 250
+       
     },
     subFirstColumn: {
         flexDirection: 'row',
@@ -284,19 +257,22 @@ const styles = StyleSheet.create({
     secondColumnStyle: {
         flexDirection: 'column',
         position: 'relative',
-        alignSelf: "flex-start",
-        paddingTop: 10,
+        alignSelf: "flex-end",
+        paddingTop: 0,
         marginTop: 0,
     },
     subSecondColumn: {
+        alignSelf: "flex-end",
         flexDirection: 'row'
     },
     sumStyle: {
+        alignSelf: "flex-end",
         color: 'green',
         fontWeight: "bold",
         fontSize: 16
     },
     sumStyle_2: {
+        alignSelf: "flex-end",
         color: 'red',
         fontWeight: "bold",
         fontSize: 16
@@ -306,11 +282,11 @@ const styles = StyleSheet.create({
         height: 15,
         marginTop: 20,
         marginLeft: 10,
-        marginRight: 10
+        marginRight: 5
     },
     balance: {
         paddingTop: 0,
-        paddingRight: 35,
+        paddingRight: 30,
         alignSelf: 'flex-end',
         color: 'black',
         fontSize: 14,

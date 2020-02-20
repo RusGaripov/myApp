@@ -24,20 +24,15 @@ export class HomeScreen extends React.Component {
 
     }
 
-
-
     componentDidMount() {
         Storage.get('data', (data) => {
-            // alert(data.transactions[0].category)
             this.setState({
                 loading: false,
                 data: JSON.parse(data),
-                //  category:JSON.parse(category)
             })
         })
 
         Storage.get('categories', (data) => {
-
             this.setState({
                 loading: false,
                 categories: JSON.parse(data),
@@ -54,13 +49,11 @@ export class HomeScreen extends React.Component {
             this.state.data[p].balance = Math.round(parsed.balance) * 100,
 
                 this.setState({
-                    //   data: JSON.parse(data),
                     balance: parsed.balance,
-
                 })
         }
         catch (error) {
-            // alert(error)
+            alert(error)
         }
     }
 
@@ -93,7 +86,6 @@ export class HomeScreen extends React.Component {
                                             title: item.title,
                                             categories: this.state.categories,
                                             description: item.description,
-                                            // category: item.transactionsх,
                                             transactions: item.transactions,
                                             balance: item.balance,
                                             id: item.id
@@ -113,7 +105,6 @@ export class HomeScreen extends React.Component {
                                             title: item.title,
                                             categories: this.state.categories,
                                             description: item.description,
-                                            // category: item.transactionsх,
                                             transactions: item.transactions,
                                             balance: item.balance,
                                             id: item.id

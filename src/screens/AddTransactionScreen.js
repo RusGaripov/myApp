@@ -3,8 +3,9 @@ import { Modal, Text, View, TextInput, StyleSheet, Image, FlatList, TouchableOpa
 import ModalExample from '../components/Picker';
 import MyDatePicker from '../components/DatePicker'
 import DatePicker from 'react-native-datepicker'
-import { Storage } from '../helpers/Index'
+import { Storage,Utils } from '../helpers/Index'
 import AsyncStorage from '@react-native-community/async-storage'
+import {TRANSACTIONS} from '../data/transactions'
 
 
 export class AddTransactionScreen extends React.Component {
@@ -16,7 +17,11 @@ export class AddTransactionScreen extends React.Component {
             date: this.props.navigation.getParam('date'),
             description: this.props.navigation.getParam('description'),
             category: this.props.navigation.getParam('category'),
+            categories: this.props.navigation.getParam('categories'),
             amount: this.props.navigation.getParam('amount'),
+            title: this.props.navigation.getParam('title'),
+            id: this.props.navigation.getParam('id'),
+            balance: this.props.navigation.getParam('balance'),
             text_2: this.props.navigation.getParam('description'),
             text: Math.abs(this.props.navigation.getParam('amount') / 100) + ' ' + "₽",
             title: 'Выберите счет',
@@ -27,21 +32,7 @@ export class AddTransactionScreen extends React.Component {
             modalVisible: false,
             selectedItemId: 0,
         }
-    }
-
-    componentDidMount() {
-        Storage.get('data', (data) => {
-            this.setState({
-                loading: false,
-                data: JSON.parse(data)
-            })
-        })
-        Storage.get('categories', (categories) => {
-            this.setState({
-                loading: false,
-                categories: JSON.parse(categories)
-            })
-        })
+      
     }
 
     addItemQuantity = (title, id, account) => {
@@ -51,52 +42,58 @@ export class AddTransactionScreen extends React.Component {
 
     };
 
-
-
-
     saveInfo_3 = async () => {
-        const { title, balance, id, date, category, description, activeLeft, amount, categories } = this.state
+        const { title, balance, id, date, category, description, activeLeft, amount, categories,datam } = this.state
         let obj_3
         if (activeLeft) {
             obj_3 = {
-                id: 6,
+                id: id,
                 title: title,
                 date: date,
                 amount: '-' + this.state.text,
                 description: this.state.text_2,
                 category: category,
                 categories: categories,
+                datam:datam
             }
         }
         else {
             obj_3 = {
-                id: 6,
+                id: id,
                 title: title,
-                amount: this.state.text_2,
+                amount: this.state.text,
                 description: this.state.text_2,
                 category: category,
                 date: date,
                 categories: categories,
             }
-
-
         }
         await AsyncStorage.setItem('adder', JSON.stringify(obj_3));
        this.goToDetail()
     }
 
     goToDetail = () => {
+        console.log('test-form')
+        console.log(this.props.navigation.getParam('transactions'))
             this.props.navigation.navigate('Detail', {
-               
-            })
+                data: this.props.navigation.getParam('data'),
+                date: this.props.navigation.getParam('date'),
+                description: this.props.navigation.getParam('description'),
+                transactions: this.props.navigation.getParam('transactions'),
+                category: this.props.navigation.getParam('category'),
+                categories: this.props.navigation.getParam('categories'),
+                amount: this.props.navigation.getParam('amount'),
+                title: this.props.navigation.getParam('title'),
+                id: this.props.navigation.getParam('id'),
+                balance: this.props.navigation.getParam('balance'),
+           })
     }
-
 
     displayInfo_3 = async () => {
         try {
             let adder = await AsyncStorage.getItem('adder')
             let parsed = JSON.parse(adder)
-            alert(parsed.id)
+            alert(parsed.title)
         }
         catch (error) {
             alert(error)
@@ -125,7 +122,8 @@ export class AddTransactionScreen extends React.Component {
                     <TouchableOpacity style={styles.centerHeader}
                         onPress={this.displayInfo_3}
                     ><Text style={styles.centerHeaderText}>Операция</Text></TouchableOpacity>
-                    <TouchableOpacity style={styles.rightHeader} onPress={this.saveInfo_3}><Text style={styles.rightHeaderText}>Сохранить</Text></TouchableOpacity>
+                    <TouchableOpacity  
+                    style={styles.rightHeader} onPress={this.saveInfo_3}><Text style={styles.rightHeaderText}>Сохранить</Text></TouchableOpacity>
                 </View>
 
                 <View style={styles.menu}>
@@ -170,13 +168,11 @@ export class AddTransactionScreen extends React.Component {
                             }}
                         ><Text style={styles.centerMenuText_2}>Поступление</Text></TouchableOpacity>}
 
-
                     {!this.state.activeRight ? <TouchableOpacity style={styles.rightMenu}
                         onPress={() => {
                             this.setModalVisible(true);
                         }}
                     >
-
                         <Text style={styles.rightMenuText}>Перевод</Text>
                     </TouchableOpacity>
 
@@ -265,9 +261,7 @@ export class AddTransactionScreen extends React.Component {
                         <Image source={require('../assets/image/forward.png')} style={styles.forward} />
                         <Image source={require('../assets/image/forward.png')} style={styles.forward} />
                         <Image source={require('../assets/image/forward.png')} style={styles.forward} />
-
                     </View>
-
                 </View>
 
                 <Modal
@@ -278,7 +272,7 @@ export class AddTransactionScreen extends React.Component {
                     <View style={styles.listAndCloser}>
                         <View style={styles.list}>
                             <FlatList
-                                data={DATA}
+                                data={TRANSACTIONS}
                                 keyExtractor={item => item.id}
                                 renderItem={({ item }) => (
                                     <View style={styles.groupModal}>
@@ -583,31 +577,3 @@ const styles = StyleSheet.create({
 
 
 })
-
-const DATA = [
-    {
-        id: 1,
-        title: 'Наличные',
-    },
-    {
-        id: 2,
-        title: 'Тинькофф',
-    },
-    {
-        id: 3,
-        title: 'Тинькофф Бизнес',
-    },
-    {
-        id: 4,
-        title: 'Сбербанк',
-    },
-    {
-        id: 5,
-        title: 'Яндекс.Деньги',
-    },
-    {
-        id: 6,
-        title: 'Альфа Банк',
-    },
-
-];
