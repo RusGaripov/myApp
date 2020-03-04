@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Storage, Utils } from '../helpers/Index';
 import AsyncStorage from '@react-native-community/async-storage'
-
+import { NavigationEvents } from 'react-navigation';
 
 export class HomeScreen extends React.Component {
     constructor(props) {
@@ -19,14 +19,13 @@ export class HomeScreen extends React.Component {
             data: null,
             loading: true,
             categories: null,
-            category: null
+            category: null,
         }
 
     }
 
-
-
     componentDidMount() {
+
         Storage.get('data', (data) => {
             // alert(data.transactions[0].category)
             this.setState({
@@ -43,6 +42,37 @@ export class HomeScreen extends React.Component {
                 categories: JSON.parse(data),
             })
         })
+    }
+
+
+    onFocusFunction = () => {
+        // do some stuff on every screen focus
+        Storage.get('data', (data) => {
+            this.setState({
+                loading: false,
+                data: JSON.parse(data),
+            })
+        })
+
+        Storage.get('categories', (data) => {
+            this.setState({
+                loading: false,
+                categories: JSON.parse(data),
+            })
+        })
+    }
+
+    // add a focus listener onDidMount
+    async componentDidMount() {
+        this.focusListener = this.props.navigation.addListener('didFocus', () => {
+            this.onFocusFunction()
+        })
+        //    console.log(4, this.state.data[0].transactions)
+    }
+
+    // and don't forget to remove the listener
+    componentWillUnmount() {
+        this.focusListener.remove()
     }
 
 
@@ -64,14 +94,17 @@ export class HomeScreen extends React.Component {
         }
     }
 
+
+
     render() {
-        this.displayInfo_2()
+        //   this.displayInfo_2()
 
         if (this.state.loading)
             return <ActivityIndicator />
         return (
             <View style={styles.container}>
                 <View style={styles.header}>
+                    <NavigationEvents onDidFocus={() => console.log('I am triggered')} />
                     <TouchableOpacity style={styles.leftHeader}><Text style={styles.leftHeaderText}>Править</Text></TouchableOpacity>
                     <TouchableOpacity style={styles.centerHeader}
                         onPress={this.displayInfo_2} ><Text style={styles.centerHeaderText}>Счета</Text></TouchableOpacity>
@@ -88,16 +121,12 @@ export class HomeScreen extends React.Component {
                                 <Text style={styles.listTitle}
                                     onPress={() => {
                                         this.props.navigation.navigate('Detail', {
-                                            data: item,
-                                            amount: item.amount,
-                                            title: item.title,
                                             categories: this.state.categories,
-                                            description: item.description,
-                                            // category: item.transactionsх,
-                                            transactions: item.transactions,
-                                            balance: item.balance,
-                                            id: item.id
+                                           // id: this.state.data[item.id - 1].id,
+                                             id: item.id,
+                                             data: item
                                         })
+                                        console.log(1, this.state.data[item.id - 1].id, item.id)
                                     }}
                                 >{item.title}</Text>
                             </View>
@@ -109,15 +138,12 @@ export class HomeScreen extends React.Component {
                                     onPress={() => {
                                         this.props.navigation.navigate('AddTransaction', {
                                             data: item,
-                                            amount: item.amount,
-                                            title: item.title,
                                             categories: this.state.categories,
-                                            description: item.description,
-                                            // category: item.transactionsх,
-                                            transactions: item.transactions,
-                                            balance: item.balance,
-                                            id: item.id
+                                          //  id: item.id
+                                          id: this.state.data[item.id - 1].id,
                                         })
+                                   //     console.log(item)
+
                                     }}>
 
                                     <Image source={require('../assets/image/adder.png')} style={styles.plus}

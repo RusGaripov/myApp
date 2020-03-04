@@ -3,91 +3,132 @@ import { Modal, Text, View, TextInput, StyleSheet, Image, FlatList, TouchableOpa
 import ModalExample from '../components/Picker';
 import DatePicker from 'react-native-datepicker'
 import AsyncStorage from '@react-native-community/async-storage'
+import { Utils, Storage } from '../helpers/Index'
 
 export class DeepDetailScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            data: this.props.navigation.getParam('data'),
             loading: true,
             categories: this.props.navigation.getParam('categories'),
-            date: this.props.navigation.getParam('date'),
-            title: this.props.navigation.getParam('title'),
+            category: null,
             id: this.props.navigation.getParam('id'),
-            //   amount: this.props.navigation.getParam('amount'),
-            description: this.props.navigation.getParam('description'),
-            category: this.props.navigation.getParam('category'),
+            id_home: this.props.navigation.getParam('id_home'),
+            data: null,
             activeLeft: true,
             activeCenter: false,
             activeRight: false,
             selectField: 'Справа',
             modalVisible: false,
-            text: Math.abs(this.props.navigation.getParam('amount') / 100) + ' ' + "₽",
-            text_2: this.props.navigation.getParam('description'),
-            id_2: null
         }
-        //   alert(this.state.categories[0].title)
+    }
+
+    componentDidMount() {
+        Storage.get('data', (data) => {
+            const parsedData = JSON.parse(data)
+
+            this.setState({
+                data: JSON.parse(data),
+                loading: false,
+                title: parsedData[this.state.id_home - 1].transactions[this.state.id - 1].title,
+                date: Utils.timestampToDate(parsedData[this.state.id_home - 1].transactions[this.state.id - 1].date),
+                // date: parsedData[this.state.id_home - 1].transactions[this.state.id - 1].date,
+                description: parsedData[this.state.id_home - 1].transactions[this.state.id - 1].description,
+                category: parsedData[this.state.id_home - 1].transactions[this.state.id - 1].category,
+                amount: parsedData[this.state.id_home - 1].transactions[this.state.id - 1].amount,
+                text: Math.abs(parsedData[this.state.id_home - 1].transactions[this.state.id - 1].amount / 100) + ' ' + "₽",
+                text_2: parsedData[this.state.id_home - 1].transactions[this.state.id - 1].description,
+
+            })
+
+        })
+        //   console.log(this.state.title)
     }
 
 
     addItemQuantity = (title, id, account) => {
-        //    alert(category)
-        //    alert(title)
         this.setState({
             category: title
         })
 
     };
 
+    saveInfo = async () => {
+        const { title, balance, id, date, category, description, activeLeft, text, text_2,amount, categories, data } = this.state
+        var myDate = this.state.date.toString().split("-");     // date
+        //  myDate = myDate.split("-");
+        var newDate = myDate[1] + "/" + myDate[0] + "/" + myDate[2];
+        this.state.date = new Date(newDate).getTime() / 1000
+       
+        {
+            activeLeft === true ?
+                data[this.state.id_home-1].transactions[this.state.id-1] = ({ id: id, title: title, amount: -parseInt(text), description: text_2, category: category, date: this.state.date, categories: categories, })
 
-    saveInfo = () => {
-        const { title, balance, id, date, category, description, activeLeft, text, categories } = this.state
-
-        let obj
-
-        if (activeLeft) {
-            // this.state.text =
-            obj = {
-                id: id,
-                title: title,
-                //  amount:parseInt((-this.state.text), 10)*100,
-                amount: '-'+this.state.text,
-                description: this.state.text_2,
-                category: category,
-                date: date,
-                categories: categories,
-
-            }
+                : data[this.state.id_home-1].transactions[this.state.id-1] = ({ id: id, title: title, amount: parseInt(text), description: text_2, category: category, date: this.state.date, categories: categories, })
         }
-        else {
-            obj = {
-                id: id,
-                title: title,
-                amount: this.state.text,
-                //   amount: parseInt(this.state.text, 10)*100,
-                description: this.state.text_2,
-                category: category,
-                date: date,
-                categories: categories,
-            }
-
-
-        }
-
-
-        AsyncStorage.setItem('trans', JSON.stringify(obj));
+        AsyncStorage.setItem('data', JSON.stringify(data));
+        console.log(this.state.data[id_home-1].transactions[id-1])
+        
     }
 
-    displayInfo = async () => {
-        try {
-            let trans = await AsyncStorage.getItem('trans')
-            let parsed = JSON.parse(trans)
-            //    alert(parsed.category)
-        }
-        catch (error) {
-            alert(error)
-        }
-    }
+
+
+    //console.log(this.state.id)
+
+
+
+
+
+
+
+    /*  saveInfo = () => {
+          const { title, balance, id, date, category, description, activeLeft, text, categories } = this.state
+  
+          let obj
+  
+          if (activeLeft) {
+  
+              obj = {
+                  id: id,
+                  title: title,
+                  amount: '-' + this.state.text,
+                  description: this.state.text_2,
+                  category: category,
+                  date: date,
+                  categories: categories,
+  
+              }
+          }
+          else {
+              obj = {
+                  id: id,
+                  title: title,
+                  amount: this.state.text,
+                  description: this.state.text_2,
+                  category: category,
+                  date: date,
+                  categories: categories,
+              }
+  
+              //alert(this.state.title)
+          }
+      
+  console.log(this.state.data[0].transactions[0])
+  
+          AsyncStorage.setItem('trans', JSON.stringify(obj));
+      }
+  
+      displayInfo = async () => {
+          try {
+              let trans = await AsyncStorage.getItem('trans')
+              let parsed = JSON.parse(trans)
+              //    alert(parsed.category)
+              //    console.log(parsed.title)
+          }
+          catch (error) {
+              alert(error)
+          }
+      }*/
     setModalVisible(visible) {
         this.setState({ modalVisible: visible });
     }
@@ -231,8 +272,8 @@ export class DeepDetailScreen extends React.Component {
                         </View>
 
                         <View style={styles.listTitle_3}>
-                            <ModalExample
-                                title={this.state.categories[this.state.category - 1].title} selectField={'Центр'} addItemQuantityPress={this.addItemQuantity} />
+                            {this.state.category != null ? <ModalExample
+                                title={this.state.categories[this.state.category - 1].title} selectField={'Центр'} addItemQuantityPress={this.addItemQuantity} /> : null}
                         </View>
                         <TextInput style={styles.listTitle_2} onChangeText={(text_2) => this.setState({ text_2 })} value={this.state.text_2} />
                         {!this.state.activeCenter ? <TextInput style={styles.listTitle_2} onChangeText={(text) => this.setState({ text })} value={this.state.text} />

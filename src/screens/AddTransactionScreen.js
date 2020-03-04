@@ -3,27 +3,24 @@ import { Modal, Text, View, TextInput, StyleSheet, Image, FlatList, TouchableOpa
 import ModalExample from '../components/Picker';
 import MyDatePicker from '../components/DatePicker'
 import DatePicker from 'react-native-datepicker'
-import { Storage,Utils } from '../helpers/Index'
+import { Storage, Utils } from '../helpers/Index'
 import AsyncStorage from '@react-native-community/async-storage'
+import { NavigationEvents } from 'react-navigation';
 
 
 export class AddTransactionScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            data: this.props.navigation.getParam('data'),
-            datam: this.props.navigation.getParam('transactions'),
-            date: this.props.navigation.getParam('date'),
-            description: this.props.navigation.getParam('description'),
-            category: this.props.navigation.getParam('category'),
             categories: this.props.navigation.getParam('categories'),
-            amount: this.props.navigation.getParam('amount'),
-            title: this.props.navigation.getParam('title'),
             id: this.props.navigation.getParam('id'),
-            balance: this.props.navigation.getParam('balance'),
+            category: null,
+            description: '',
+            amount: null,
             text_2: this.props.navigation.getParam('description'),
             text: Math.abs(this.props.navigation.getParam('amount') / 100) + ' ' + "₽",
             title: 'Выберите счет',
+            data: null,
             activeLeft: true,
             activeCenter: false,
             activeRight: false,
@@ -31,12 +28,38 @@ export class AddTransactionScreen extends React.Component {
             modalVisible: false,
             selectedItemId: 0,
         }
-      
+        //  console.log(this.state.id)
+
     }
 
     componentDidMount() {
-  
+
+        Storage.get('data', (data) => {
+            const parsedData = JSON.parse(data)
+            this.setState({
+                loading: false,
+                data: JSON.parse(data),
+            })
+        })
+        // console.log(this.state.data) 
+
     }
+
+
+    /* joinData =  () => {
+         const { title, balance, id, date, category, description, activeLeft, text, amount, categories, data } = this.state
+         
+         this.state.data[0].transactions.push({ title:title, date: date, amount: amount, category:category, description: description})
+         this.setState({
+             data: [...this.state.data],
+         })
+       console.log(  this.state.data)
+     }*/
+
+
+
+
+
 
     addItemQuantity = (title, id, account) => {
         this.setState({
@@ -46,10 +69,58 @@ export class AddTransactionScreen extends React.Component {
     };
 
 
-
-
     saveInfo_3 = async () => {
-        const { title, balance, id, date, category, description, activeLeft, amount, categories,datam } = this.state
+        //  const { title, balance, id, date, category, description, activeLeft, amount, categories, data } = this.state
+        var myDate = this.state.date.toString().split("-");     // date
+        //  myDate = myDate.split("-");
+        var newDate = myDate[1] + "/" + myDate[0] + "/" + myDate[2];
+        this.state.date = new Date(newDate).getTime() / 1000
+
+        var o;
+        for (var i = 0; i < this.state.data.length; i++) {
+            if (this.state.title == this.state.data[i].title)
+                o = i
+            //   console.log(o)
+        }
+        let u = this.state.data[this.state.id - 1].transactions.length
+
+
+        {
+            this.state.activeLeft === true ?
+                this.state.data[this.state.id - 1].transactions.push({
+                    id: this.state.data[this.state.id - 1].transactions.length + 1, title: this.state.title, date: this.state.date,
+                    amount: -parseInt(this.state.text), category: this.state.category, description: this.state.text_2
+                }) &&
+                this.state.data[o].transactions.push({
+                    id: this.state.data[o].transactions.length + 1, title: this.state.title, date: this.state.date,
+                    amount: parseInt(this.state.text), category: this.state.category, description: this.state.text_2
+                })
+                &&
+                (this.state.data[this.state.id - 1].balance = Utils.balanceSum_3(this.state.data[this.state.id - 1].transactions)[u] * 100)
+                &&
+                (this.state.data[o].balance = Utils.balanceSum_3(this.state.data[o].transactions)[ this.state.data[o].transactions.length-1] * 100)
+                :
+                this.state.data[this.state.id - 1].transactions.push({
+                    id: this.state.data[this.state.id - 1].transactions.length + 1, title: this.state.title, date: this.state.date,
+                    amount: parseInt(this.state.text), category: this.state.category, description: this.state.text_2
+                }) &&
+                this.state.data[o].transactions.push({
+                    id: this.state.data[o].transactions.length + 1, title: this.state.title, date: this.state.date,
+                    amount: -parseInt(this.state.text), category: this.state.category, description: this.state.text_2
+                }) &&
+                (this.state.data[this.state.id - 1].balance = Utils.balanceSum_3(this.state.data[this.state.id - 1].transactions)[u - 1] * 100)
+                &&
+                (this.state.data[this.state.id - 1].balance = Utils.balanceSum_3(this.state.data[this.state.id - 1].transactions)[u] * 100)
+                &&
+                (this.state.data[o].balance = Utils.balanceSum_3(this.state.data[o].transactions)[ this.state.data[o].transactions.length-1] * 100)
+        }
+
+        //   this.setState({
+        //    data: [...this.state.data[0].transactions],
+        //  })
+
+        AsyncStorage.setItem('data', JSON.stringify(this.state.data));
+
         let obj_3
         if (activeLeft) {
             obj_3 = {
@@ -60,7 +131,7 @@ export class AddTransactionScreen extends React.Component {
                 description: this.state.text_2,
                 category: category,
                 categories: categories,
-                datam:datam
+                datam: datam
             }
         }
         else {
@@ -73,30 +144,58 @@ export class AddTransactionScreen extends React.Component {
                 date: date,
                 categories: categories,
             }
-//alert(this.props.navigation.getParam('transactions'))
+
 
         }
-        await AsyncStorage.setItem('adder', JSON.stringify(obj_3));
-       this.goToDetail()
+      
+        // this.goToDetail()
     }
 
-    goToDetail = () => {
-        console.log('test-form')
-        console.log(this.props.navigation.getParam('transactions'))
-     //   alert(this.props.navigation.getParam('transactions'))
-            this.props.navigation.navigate('Detail', {
-                data: this.props.navigation.getParam('data'),
-                date: this.props.navigation.getParam('date'),
-                description: this.props.navigation.getParam('description'),
-                transactions: this.props.navigation.getParam('transactions'),
-                category: this.props.navigation.getParam('category'),
-                categories: this.props.navigation.getParam('categories'),
-                amount: this.props.navigation.getParam('amount'),
-                title: this.props.navigation.getParam('title'),
-                id: this.props.navigation.getParam('id'),
-                balance: this.props.navigation.getParam('balance'),
-           })
+
+
+    onFocusFunction = () => {
+        // do some stuff on every screen focus
+        Storage.get('data', (data) => {
+            //     console.log(this.state.data)
+            this.setState({
+                loading: false,
+                data: JSON.parse(data),
+            })
+        })
+
+        Storage.get('categories', (data) => {
+
+            this.setState({
+                loading: false,
+                categories: JSON.parse(data),
+            })
+        })
     }
+
+    // add a focus listener onDidMount
+    async componentDidMount() {
+        this.focusListener = this.props.navigation.addListener('didFocus', () => {
+            this.onFocusFunction()
+        })
+    }
+
+    // and don't forget to remove the listener
+    componentWillUnmount() {
+        this.focusListener.remove()
+    }
+
+
+
+
+
+    /*goToDetail = () => {
+        // console.log('test-form')
+        //  console.log(this.props.navigation.getParam('transactions'))
+        //   alert(this.props.navigation.getParam('transactions'))
+        this.props.navigation.navigate('Detail', {
+
+        })
+    }*/
 
 
     displayInfo_3 = async () => {
@@ -130,10 +229,18 @@ export class AddTransactionScreen extends React.Component {
                     ><Text style={styles.leftHeaderText}>Отменить</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.centerHeader}
-                        onPress={this.displayInfo_3}
+                        onPress={() => {
+                            this.props.navigation.navigate('Detail', {
+                                data: this.state.data,
+                                categories: this.state.categories,
+                                id: this.state.id,
+                            })
+                            console.log(2)
+                        }}
+
                     ><Text style={styles.centerHeaderText}>Операция</Text></TouchableOpacity>
-                    <TouchableOpacity  
-                    style={styles.rightHeader} onPress={this.saveInfo_3}><Text style={styles.rightHeaderText}>Сохранить</Text></TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.rightHeader} onPress={this.saveInfo_3}><Text style={styles.rightHeaderText}>Сохранить</Text></TouchableOpacity>
                 </View>
 
                 <View style={styles.menu}>
