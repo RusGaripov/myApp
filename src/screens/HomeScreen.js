@@ -19,6 +19,7 @@ export class HomeScreen extends React.Component {
             data: null,
             loading: true,
             categories: null,
+<<<<<<< HEAD
             category: null,
         }
 
@@ -36,6 +37,12 @@ export class HomeScreen extends React.Component {
         })
 
         Storage.get('categories', (data) => {
+=======
+            category: null
+        }
+
+    }
+>>>>>>> a7619bef02cdcd384aae625edcc8f43c2ae7b858
 
             this.setState({
                 loading: false,
@@ -75,7 +82,10 @@ export class HomeScreen extends React.Component {
         this.focusListener.remove()
     }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> a7619bef02cdcd384aae625edcc8f43c2ae7b858
     displayInfo_2 = async () => {
         try {
             let counter = await AsyncStorage.getItem('counter')
@@ -84,20 +94,30 @@ export class HomeScreen extends React.Component {
             this.state.data[p].balance = Math.round(parsed.balance) * 100,
 
                 this.setState({
+<<<<<<< HEAD
                     //   data: JSON.parse(data),
+=======
+>>>>>>> a7619bef02cdcd384aae625edcc8f43c2ae7b858
                     balance: parsed.balance,
-
                 })
         }
         catch (error) {
+<<<<<<< HEAD
             // alert(error)
+=======
+            alert(error)
+>>>>>>> a7619bef02cdcd384aae625edcc8f43c2ae7b858
         }
     }
 
 
 
     render() {
+<<<<<<< HEAD
         //   this.displayInfo_2()
+=======
+        this.displayInfo_2()
+>>>>>>> a7619bef02cdcd384aae625edcc8f43c2ae7b858
 
         if (this.state.loading)
             return <ActivityIndicator />
@@ -121,10 +141,21 @@ export class HomeScreen extends React.Component {
                                 <Text style={styles.listTitle}
                                     onPress={() => {
                                         this.props.navigation.navigate('Detail', {
+<<<<<<< HEAD
                                             categories: this.state.categories,
                                            // id: this.state.data[item.id - 1].id,
                                              id: item.id,
                                              data: item
+=======
+                                            data: item,
+                                            amount: item.amount,
+                                            title: item.title,
+                                            categories: this.state.categories,
+                                            description: item.description,
+                                            transactions: item.transactions,
+                                            balance: item.balance,
+                                            id: item.id
+>>>>>>> a7619bef02cdcd384aae625edcc8f43c2ae7b858
                                         })
                                         console.log(1, this.state.data[item.id - 1].id, item.id)
                                     }}
@@ -138,12 +169,23 @@ export class HomeScreen extends React.Component {
                                     onPress={() => {
                                         this.props.navigation.navigate('AddTransaction', {
                                             data: item,
+<<<<<<< HEAD
                                             categories: this.state.categories,
                                           //  id: item.id
                                           id: this.state.data[item.id - 1].id,
                                         })
                                    //     console.log(item)
 
+=======
+                                            amount: item.amount,
+                                            title: item.title,
+                                            categories: this.state.categories,
+                                            description: item.description,
+                                            transactions: item.transactions,
+                                            balance: item.balance,
+                                            id: item.id
+                                        })
+>>>>>>> a7619bef02cdcd384aae625edcc8f43c2ae7b858
                                     }}>
 
                                     <Image source={require('../assets/image/adder.png')} style={styles.plus}

@@ -3,15 +3,22 @@ import { Modal, Text, View, TextInput, StyleSheet, Image, FlatList, TouchableOpa
 import ModalExample from '../components/Picker';
 import MyDatePicker from '../components/DatePicker'
 import DatePicker from 'react-native-datepicker'
+<<<<<<< HEAD
 import { Storage, Utils } from '../helpers/Index'
 import AsyncStorage from '@react-native-community/async-storage'
 import { NavigationEvents } from 'react-navigation';
+=======
+import { Storage,Utils } from '../helpers/Index'
+import AsyncStorage from '@react-native-community/async-storage'
+import {TRANSACTIONS} from '../data/transactions'
+>>>>>>> a7619bef02cdcd384aae625edcc8f43c2ae7b858
 
 
 export class AddTransactionScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+<<<<<<< HEAD
             categories: this.props.navigation.getParam('categories'),
             id: this.props.navigation.getParam('id'),
             category: null,
@@ -21,6 +28,21 @@ export class AddTransactionScreen extends React.Component {
             text: Math.abs(this.props.navigation.getParam('amount') / 100) + ' ' + "₽",
             title: 'Выберите счет',
             data: null,
+=======
+            data: this.props.navigation.getParam('data'),
+            datam: this.props.navigation.getParam('transactions'),
+            date: this.props.navigation.getParam('date'),
+            description: this.props.navigation.getParam('description'),
+            category: this.props.navigation.getParam('category'),
+            categories: this.props.navigation.getParam('categories'),
+            amount: this.props.navigation.getParam('amount'),
+            title: this.props.navigation.getParam('title'),
+            id: this.props.navigation.getParam('id'),
+            balance: this.props.navigation.getParam('balance'),
+            text_2: this.props.navigation.getParam('description'),
+            text: Math.abs(this.props.navigation.getParam('amount') / 100) + ' ' + "₽",
+            title: 'Выберите счет',
+>>>>>>> a7619bef02cdcd384aae625edcc8f43c2ae7b858
             activeLeft: true,
             activeCenter: false,
             activeRight: false,
@@ -28,6 +50,7 @@ export class AddTransactionScreen extends React.Component {
             modalVisible: false,
             selectedItemId: 0,
         }
+<<<<<<< HEAD
         //  console.log(this.state.id)
 
     }
@@ -43,6 +66,9 @@ export class AddTransactionScreen extends React.Component {
         })
         // console.log(this.state.data) 
 
+=======
+      
+>>>>>>> a7619bef02cdcd384aae625edcc8f43c2ae7b858
     }
 
 
@@ -68,6 +94,7 @@ export class AddTransactionScreen extends React.Component {
 
     };
 
+<<<<<<< HEAD
 
     saveInfo_3 = async () => {
         //  const { title, balance, id, date, category, description, activeLeft, amount, categories, data } = this.state
@@ -121,6 +148,10 @@ export class AddTransactionScreen extends React.Component {
 
         AsyncStorage.setItem('data', JSON.stringify(this.state.data));
 
+=======
+    saveInfo_3 = async () => {
+        const { title, balance, id, date, category, description, activeLeft, amount, categories,datam } = this.state
+>>>>>>> a7619bef02cdcd384aae625edcc8f43c2ae7b858
         let obj_3
         if (activeLeft) {
             obj_3 = {
@@ -131,7 +162,11 @@ export class AddTransactionScreen extends React.Component {
                 description: this.state.text_2,
                 category: category,
                 categories: categories,
+<<<<<<< HEAD
                 datam: datam
+=======
+                datam:datam
+>>>>>>> a7619bef02cdcd384aae625edcc8f43c2ae7b858
             }
         }
         else {
@@ -144,6 +179,7 @@ export class AddTransactionScreen extends React.Component {
                 date: date,
                 categories: categories,
             }
+<<<<<<< HEAD
 
 
         }
@@ -213,6 +249,45 @@ export class AddTransactionScreen extends React.Component {
         this.setState({ modalVisible: visible });
     }
 
+=======
+        }
+        await AsyncStorage.setItem('adder', JSON.stringify(obj_3));
+       this.goToDetail()
+    }
+
+    goToDetail = () => {
+        console.log('test-form')
+        console.log(this.props.navigation.getParam('transactions'))
+            this.props.navigation.navigate('Detail', {
+                data: this.props.navigation.getParam('data'),
+                date: this.props.navigation.getParam('date'),
+                description: this.props.navigation.getParam('description'),
+                transactions: this.props.navigation.getParam('transactions'),
+                category: this.props.navigation.getParam('category'),
+                categories: this.props.navigation.getParam('categories'),
+                amount: this.props.navigation.getParam('amount'),
+                title: this.props.navigation.getParam('title'),
+                id: this.props.navigation.getParam('id'),
+                balance: this.props.navigation.getParam('balance'),
+           })
+    }
+
+    displayInfo_3 = async () => {
+        try {
+            let adder = await AsyncStorage.getItem('adder')
+            let parsed = JSON.parse(adder)
+            alert(parsed.title)
+        }
+        catch (error) {
+            alert(error)
+        }
+    }
+
+    setModalVisible(visible) {
+        this.setState({ modalVisible: visible });
+    }
+
+>>>>>>> a7619bef02cdcd384aae625edcc8f43c2ae7b858
     _onPress(account) {
         this.setState({ title: account.title, selectedItemId: account.id });
         this.setModalVisible(!this.state.modalVisible);
@@ -239,8 +314,13 @@ export class AddTransactionScreen extends React.Component {
                         }}
 
                     ><Text style={styles.centerHeaderText}>Операция</Text></TouchableOpacity>
+<<<<<<< HEAD
                     <TouchableOpacity
                         style={styles.rightHeader} onPress={this.saveInfo_3}><Text style={styles.rightHeaderText}>Сохранить</Text></TouchableOpacity>
+=======
+                    <TouchableOpacity  
+                    style={styles.rightHeader} onPress={this.saveInfo_3}><Text style={styles.rightHeaderText}>Сохранить</Text></TouchableOpacity>
+>>>>>>> a7619bef02cdcd384aae625edcc8f43c2ae7b858
                 </View>
 
                 <View style={styles.menu}>
@@ -285,13 +365,11 @@ export class AddTransactionScreen extends React.Component {
                             }}
                         ><Text style={styles.centerMenuText_2}>Поступление</Text></TouchableOpacity>}
 
-
                     {!this.state.activeRight ? <TouchableOpacity style={styles.rightMenu}
                         onPress={() => {
                             this.setModalVisible(true);
                         }}
                     >
-
                         <Text style={styles.rightMenuText}>Перевод</Text>
                     </TouchableOpacity>
 
@@ -380,9 +458,7 @@ export class AddTransactionScreen extends React.Component {
                         <Image source={require('../assets/image/forward.png')} style={styles.forward} />
                         <Image source={require('../assets/image/forward.png')} style={styles.forward} />
                         <Image source={require('../assets/image/forward.png')} style={styles.forward} />
-
                     </View>
-
                 </View>
 
                 <Modal
@@ -393,7 +469,7 @@ export class AddTransactionScreen extends React.Component {
                     <View style={styles.listAndCloser}>
                         <View style={styles.list}>
                             <FlatList
-                                data={DATA}
+                                data={TRANSACTIONS}
                                 keyExtractor={item => item.id}
                                 renderItem={({ item }) => (
                                     <View style={styles.groupModal}>
@@ -696,6 +772,7 @@ const styles = StyleSheet.create({
         height: 20
     },
 
+<<<<<<< HEAD
 
 })
 
@@ -724,5 +801,7 @@ const DATA = [
         id: 6,
         title: 'Альфа Банк',
     },
+=======
+>>>>>>> a7619bef02cdcd384aae625edcc8f43c2ae7b858
 
-];
+})
