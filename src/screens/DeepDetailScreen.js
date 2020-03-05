@@ -3,11 +3,7 @@ import { Modal, Text, View, TextInput, StyleSheet, Image, FlatList, TouchableOpa
 import ModalExample from '../components/Picker';
 import DatePicker from 'react-native-datepicker'
 import AsyncStorage from '@react-native-community/async-storage'
-<<<<<<< HEAD
 import { Utils, Storage } from '../helpers/Index'
-=======
-import { TRANSACTIONS } from '../data/transactions'
->>>>>>> a7619bef02cdcd384aae625edcc8f43c2ae7b858
 
 export class DeepDetailScreen extends React.Component {
     constructor(props) {
@@ -15,26 +11,16 @@ export class DeepDetailScreen extends React.Component {
         this.state = {
             loading: true,
             categories: this.props.navigation.getParam('categories'),
-<<<<<<< HEAD
             category: null,
             id: this.props.navigation.getParam('id'),
             id_home: this.props.navigation.getParam('id_home'),
             data: null,
-=======
-            transactions: this.props.navigation.getParam('transactions'),
-            date: this.props.navigation.getParam('date'),
-            title: this.props.navigation.getParam('title'),
-            id: this.props.navigation.getParam('id'),
-            description: this.props.navigation.getParam('description'),
-            category: this.props.navigation.getParam('category'),
->>>>>>> a7619bef02cdcd384aae625edcc8f43c2ae7b858
             activeLeft: true,
             activeCenter: false,
             activeRight: false,
             selectField: 'Справа',
             modalVisible: false,
         }
-<<<<<<< HEAD
     }
 
     componentDidMount() {
@@ -57,8 +43,6 @@ export class DeepDetailScreen extends React.Component {
 
         })
         //   console.log(this.state.title)
-=======
->>>>>>> a7619bef02cdcd384aae625edcc8f43c2ae7b858
     }
 
 
@@ -69,7 +53,6 @@ export class DeepDetailScreen extends React.Component {
 
     };
 
-<<<<<<< HEAD
     saveInfo = async () => {
         const { title, balance, id, date, category, description, activeLeft, text, text_2,amount, categories, data } = this.state
         var myDate = this.state.date.toString().split("-");     // date
@@ -79,48 +62,17 @@ export class DeepDetailScreen extends React.Component {
        
         {
             activeLeft === true ?
-                data[this.state.id_home-1].transactions[this.state.id-1] = ({ id: id, title: title, amount: -parseInt(text), description: text_2, category: category, date: this.state.date, categories: categories, })
+                data[this.state.id_home-1].transactions[this.state.id-1] = ({ id: id, title: title, amount: -parseFloat(text)*100, description: text_2, category: category, date: this.state.date, categories: categories, })
 
-                : data[this.state.id_home-1].transactions[this.state.id-1] = ({ id: id, title: title, amount: parseInt(text), description: text_2, category: category, date: this.state.date, categories: categories, })
+                : data[this.state.id_home-1].transactions[this.state.id-1] = ({ id: id, title: title, amount: parseFloat(text)*100, description: text_2, category: category, date: this.state.date, categories: categories, })
         }
         AsyncStorage.setItem('data', JSON.stringify(data));
-        console.log(this.state.data[id_home-1].transactions[id-1])
-        
+      //  console.log(Utils.balanceSum_3(this.state.data[this.state.id_home - 1].transactions)[u] * 100))
+      this.props.navigation.navigate('Detail')
     }
-=======
-
-    saveInfo = () => {
-        const { title, balance, id, date, category, description, activeLeft, text, categories } = this.state
-
-        let obj
-
-        if (activeLeft) {
-            obj = {
-                id: id,
-                title: title,
-                amount: '-' + this.state.text,
-                description: this.state.text_2,
-                category: category,
-                date: date,
-                categories: categories,
-
-            }
-        }
-        else {
-            obj = {
-                id: id,
-                title: title,
-                amount: this.state.text,
-                description: this.state.text_2,
-                category: category,
-                date: date,
-                categories: categories,
-            }
->>>>>>> a7619bef02cdcd384aae625edcc8f43c2ae7b858
 
 
 
-<<<<<<< HEAD
     //console.log(this.state.id)
 
 
@@ -183,67 +135,29 @@ export class DeepDetailScreen extends React.Component {
     _onPress(account) {
         this.setState({ title: account.title, selectedItemId: account.id, amount: this.state.text });
         this.setModalVisible(!this.state.modalVisible);
-=======
-        this.goToDetailFromDeep()
-        AsyncStorage.setItem('trans', JSON.stringify(obj));
-    }
-
-    displayInfo = async () => {
-        try {
-            let trans = await AsyncStorage.getItem('trans')
-            let parsed = JSON.parse(trans)
-            //    alert(parsed.id)
-        }
-        catch (error) {
-            alert(error)
-        }
-    }
-
-    goToDetailFromDeep = () => {
-        this.props.navigation.navigate('Detail')
->>>>>>> a7619bef02cdcd384aae625edcc8f43c2ae7b858
     }
 
 
-setModalVisible(visible) {
-    this.setState({ modalVisible: visible });
-}
-_onPress(account) {
-    this.setState({ title: account.title, selectedItemId: account.id, amount: this.state.text });
-    this.setModalVisible(!this.state.modalVisible);
-}
 
-
-
-render() {
-    return (
-        <View style={styles.container}>
-            <View style={styles.header}>
-                <TouchableOpacity style={styles.leftHeader}
-                    onPress={() => {
-                        this.props.navigation.navigate('Detail')
-                    }}
-                ><Text style={styles.leftHeaderText}>Назад</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.centerHeader}
-                    onPress={this.displayInfo}
-                ><Text style={styles.centerHeaderText}>Операция</Text></TouchableOpacity>
-                <TouchableOpacity style={styles.rightHeader}
-                    onPress={this.saveInfo}
-                ><Text style={styles.rightHeaderText}>Сохранить</Text></TouchableOpacity>
-            </View>
-            <View style={styles.menu}>
-                {this.state.activeLeft ? <TouchableOpacity style={styles.leftMenu}
-                    onPress={() => {
-                        this.setState({
-                            activeLeft: true,
-                            activeCenter: false,
-                            activeRight: false
-                        })
-                    }}
-                ><Text style={styles.leftMenuText}>Платеж</Text>
-                </TouchableOpacity>
-                    : <TouchableOpacity style={styles.leftMenu_2}
+    render() {
+        return (
+            <View style={styles.container}>
+                <View style={styles.header}>
+                    <TouchableOpacity style={styles.leftHeader}
+                        onPress={() => {
+                            this.props.navigation.navigate('Detail')
+                        }}
+                    ><Text style={styles.leftHeaderText}>Назад</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.centerHeader}
+                        onPress={this.displayInfo}
+                    ><Text style={styles.centerHeaderText}>Операция</Text></TouchableOpacity>
+                    <TouchableOpacity style={styles.rightHeader}
+                        onPress={this.saveInfo}
+                    ><Text style={styles.rightHeaderText}>Сохранить</Text></TouchableOpacity>
+                </View>
+                <View style={styles.menu}>
+                    {this.state.activeLeft ? <TouchableOpacity style={styles.leftMenu}
                         onPress={() => {
                             this.setState({
                                 activeLeft: true,
@@ -251,99 +165,54 @@ render() {
                                 activeRight: false
                             })
                         }}
-                    ><Text style={styles.leftMenuText_2}>Платеж</Text>
-                    </TouchableOpacity>}
+                    ><Text style={styles.leftMenuText}>Платеж</Text>
+                    </TouchableOpacity>
+                        : <TouchableOpacity style={styles.leftMenu_2}
+                            onPress={() => {
+                                this.setState({
+                                    activeLeft: true,
+                                    activeCenter: false,
+                                    activeRight: false
+                                })
+                            }}
+                        ><Text style={styles.leftMenuText_2}>Платеж</Text>
+                        </TouchableOpacity>}
 
-                {!this.state.activeCenter ? <TouchableOpacity style={styles.centerMenu}
-                    onPress={() => {
-                        this.setState({
-                            activeLeft: false,
-                            activeRight: false,
-                            activeCenter: true,
-                        })
-                    }}
-
-                ><Text style={styles.centerMenuText}>Поступление</Text></TouchableOpacity>
-                    : <TouchableOpacity style={styles.centerMenu_2}
+                    {!this.state.activeCenter ? <TouchableOpacity style={styles.centerMenu}
                         onPress={() => {
                             this.setState({
                                 activeLeft: false,
                                 activeRight: false,
                                 activeCenter: true,
-                                text: 'ddddd'
                             })
                         }}
-                    ><Text style={styles.centerMenuText_2}>Поступление</Text></TouchableOpacity>}
+
+                    ><Text style={styles.centerMenuText}>Поступление</Text></TouchableOpacity>
+                        : <TouchableOpacity style={styles.centerMenu_2}
+                            onPress={() => {
+                                this.setState({
+                                    activeLeft: false,
+                                    activeRight: false,
+                                    activeCenter: true,
+                                    text: 'ddddd'
+                                })
+                            }}
+                        ><Text style={styles.centerMenuText_2}>Поступление</Text></TouchableOpacity>}
 
 
-                {!this.state.activeRight ? <TouchableOpacity style={styles.rightMenu}
-                    onPress={() => {
-                        this.setModalVisible(true);
-                    }}
-                >
-                    <Text style={styles.rightMenuText}>Перевод</Text>
-                </TouchableOpacity>
-
-                    : <TouchableOpacity style={styles.rightMenu_2}
+                    {!this.state.activeRight ? <TouchableOpacity style={styles.rightMenu}
                         onPress={() => {
                             this.setModalVisible(true);
                         }}
                     >
-                        <Text style={styles.rightMenuText_2}>Перевод</Text>
-                    </TouchableOpacity>}
-            </View>
+                        <Text style={styles.rightMenuText}>Перевод</Text>
+                    </TouchableOpacity>
 
-            <View style={styles.listItem}>
-                <View style={styles.firstColumnStyle}>
-                    <Text style={styles.listTitle}>Дата</Text>
-                    <Text style={styles.listTitle}>Счет</Text>
-                    <Text style={styles.listTitle}>Категория</Text>
-                    <Text style={styles.listTitle}>Описание</Text>
-                    <Text style={styles.listTitle}>Сумма</Text>
-                </View>
-
-                <View style={styles.secondColumnStyle}>
-                    <DatePicker
-                        style={styles.datepicker}
-                        date={this.state.date}
-                        mode="datetime"
-                        showIcon={false}
-                        placeholder="select date"
-                        format="DD-MM-YYYY "
-                        minDate="2019-01-01"
-                        maxDate="2030-12-31"
-                        confirmBtnText="Confirm"
-                        cancelBtnText="Cancel"
-                        customStyles={
-                            {
-                                dateIcon: {
-                                    position: 'absolute',
-                                    left: 0,
-                                    top: 4,
-                                    marginLeft: 0
-                                },
-                                dateInput: {
-                                    paddingTop: 0,
-                                    marginLeft: 0,
-                                    borderWidth: 0,
-                                    borderColor: 'black',
-                                    opacity: 2,
-                                },
-                                dateText: {
-                                    fontSize: 16,
-                                    marginTop: -8,
-                                }
-                            }
-                        }
-                        onDateChange={(date) => { this.setState({ date: date }) }}
-                    />
-                    <View style={styles.listTitle_3}>
-                        <TouchableOpacity
+                        : <TouchableOpacity style={styles.rightMenu_2}
                             onPress={() => {
                                 this.setModalVisible(true);
                             }}
                         >
-<<<<<<< HEAD
                             <Text style={styles.rightMenuText_2}>Перевод</Text>
                         </TouchableOpacity>}
                 </View>
@@ -409,73 +278,60 @@ render() {
                         <TextInput style={styles.listTitle_2} onChangeText={(text_2) => this.setState({ text_2 })} value={this.state.text_2} />
                         {!this.state.activeCenter ? <TextInput style={styles.listTitle_2} onChangeText={(text) => this.setState({ text })} value={this.state.text} />
                             : <TextInput style={styles.listTitle_2_green} onChangeText={(text) => this.setState({ text })} value={this.state.text} />}
-=======
-                            <Text style={styles.listTitle_2}>{this.state.title}</Text>
-                        </TouchableOpacity>
->>>>>>> a7619bef02cdcd384aae625edcc8f43c2ae7b858
                     </View>
+                    <View style={styles.forwardContainer}>
+                        <Image source={require('../assets/image/forward.png')} style={styles.forward} />
+                        <Image source={require('../assets/image/forward.png')} style={styles.forward} />
+                        <Image source={require('../assets/image/forward.png')} style={styles.forward} />
 
-                    <View style={styles.listTitle_3}>
-                        <ModalExample
-                            title={this.state.categories[this.state.category - 1].title} selectField={'Центр'} addItemQuantityPress={this.addItemQuantity} />
                     </View>
-                    <TextInput style={styles.listTitle_2} onChangeText={(text_2) => this.setState({ text_2 })} value={this.state.text_2} />
-                    {!this.state.activeCenter ? <TextInput style={styles.listTitle_2} onChangeText={(text) => this.setState({ text })} value={this.state.text} />
-                        : <TextInput style={styles.listTitle_2_green} onChangeText={(text) => this.setState({ text })} value={this.state.text} />}
-                </View>
-                <View style={styles.forwardContainer}>
-                    <Image source={require('../assets/image/forward.png')} style={styles.forward} />
-                    <Image source={require('../assets/image/forward.png')} style={styles.forward} />
-                    <Image source={require('../assets/image/forward.png')} style={styles.forward} />
 
                 </View>
 
-            </View>
-
-            <Modal
-                animationType="slide"
-                transparent={false}
-                visible={this.state.modalVisible}
-            >
-                <View style={styles.listAndCloser}>
-                    <View style={styles.list}>
-                        <FlatList
-                            data={TRANSACTIONS}
-                            keyExtractor={item => item.id}
-                            renderItem={({ item }) => (
-                                <View style={styles.groupModal}>
-                                    <TouchableOpacity
-                                        onPress={(id) => this._onPress(item, id)}>
-                                        <View style={styles.subItem}>
-                                            <Text style={styles.subItemText}>{item.title}</Text>
+                <Modal
+                    animationType="slide"
+                    transparent={false}
+                    visible={this.state.modalVisible}
+                >
+                    <View style={styles.listAndCloser}>
+                        <View style={styles.list}>
+                            <FlatList
+                                data={DATA}
+                                keyExtractor={item => item.id}
+                                renderItem={({ item }) => (
+                                    <View style={styles.groupModal}>
+                                        <TouchableOpacity
+                                            onPress={(id) => this._onPress(item, id)}>
+                                            <View style={styles.subItem}>
+                                                <Text style={styles.subItemText}>{item.title}</Text>
+                                            </View>
+                                        </TouchableOpacity>
+                                        <View style={styles.checkbox}>
+                                            {
+                                                item.id == this.state.selectedItemId ? <Image
+                                                    source={require('../assets/image/check.png')} style={styles.check} /> : null}
                                         </View>
-                                    </TouchableOpacity>
-                                    <View style={styles.checkbox}>
-                                        {
-                                            item.id == this.state.selectedItemId ? <Image
-                                                source={require('../assets/image/check.png')} style={styles.check} /> : null}
                                     </View>
-                                </View>
-                            )}
-                        />
-                    </View>
-                    <View style={styles.closerContainer} >
-                        <TouchableOpacity
-                            onPress={() => {
-                                this.setModalVisible(!this.state.modalVisible);
-                            }}><Image source={require('../assets/image/closer.png')} style={styles.closer}
+                                )}
                             />
-                        </TouchableOpacity>
+                        </View>
+                        <View style={styles.closerContainer} >
+                            <TouchableOpacity
+                                onPress={() => {
+                                    this.setModalVisible(!this.state.modalVisible);
+                                }}><Image source={require('../assets/image/closer.png')} style={styles.closer}
+                                />
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                </View>
 
-            </Modal>
+                </Modal>
 
-        </View >
+            </View >
 
 
-    );
-}
+        );
+    }
 }
 
 
