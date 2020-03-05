@@ -1,11 +1,9 @@
 import React from 'react';
 import { Modal, Text, View, TextInput, StyleSheet, Image, FlatList, TouchableOpacity } from 'react-native';
 import ModalExample from '../components/Picker';
-import MyDatePicker from '../components/DatePicker'
 import DatePicker from 'react-native-datepicker'
 import { Storage, Utils } from '../helpers/Index'
 import AsyncStorage from '@react-native-community/async-storage'
-import { NavigationEvents } from 'react-navigation';
 
 
 export class AddTransactionScreen extends React.Component {
@@ -26,9 +24,7 @@ export class AddTransactionScreen extends React.Component {
             activeRight: false,
             selectField: 'Справа',
             modalVisible: false,
-            selectedItemId: 0,
         }
-        //  console.log(this.state.id)
 
     }
 
@@ -41,27 +37,11 @@ export class AddTransactionScreen extends React.Component {
                 data: JSON.parse(data),
             })
         })
-        // console.log(this.state.data) 
 
     }
 
 
-    /* joinData =  () => {
-         const { title, balance, id, date, category, description, activeLeft, text, amount, categories, data } = this.state
-         
-         this.state.data[0].transactions.push({ title:title, date: date, amount: amount, category:category, description: description})
-         this.setState({
-             data: [...this.state.data],
-         })
-       console.log(  this.state.data)
-     }*/
-
-
-
-
-
-
-    addItemQuantity = (title, id, account) => {
+    addItemQuantity = (title, id, account) => { // колбэк для пикера 
         this.setState({
             category: title
         })
@@ -71,9 +51,7 @@ export class AddTransactionScreen extends React.Component {
 
     saveInfo_3 = async () => {
         this.goToDetail()
-        //  const { title, balance, id, date, category, description, activeLeft, amount, categories, data } = this.state
-        var myDate = this.state.date.toString().split("-");     // date
-        //  myDate = myDate.split("-");
+        var myDate = this.state.date.toString().split("-");     // преобразование времени
         var newDate = myDate[1] + "/" + myDate[0] + "/" + myDate[2];
         this.state.date = new Date(newDate).getTime() / 1000
 
@@ -81,7 +59,6 @@ export class AddTransactionScreen extends React.Component {
         for (var i = 0; i < this.state.data.length; i++) {
             if (this.state.title == this.state.data[i].title)
                 o = i
-            //   console.log(o)
         }
         let u = this.state.data[this.state.id - 1].transactions.length
 
@@ -99,7 +76,7 @@ export class AddTransactionScreen extends React.Component {
                 &&
                 (this.state.data[this.state.id - 1].balance = Utils.balanceSum_3(this.state.data[this.state.id - 1].transactions)[u] * 100)
                 &&
-                (this.state.data[o].balance = Utils.balanceSum_3(this.state.data[o].transactions)[ this.state.data[o].transactions.length-1] * 100)
+                (this.state.data[o].balance = Utils.balanceSum_3(this.state.data[o].transactions)[this.state.data[o].transactions.length - 1] * 100)
                 :
                 this.state.data[this.state.id - 1].transactions.push({
                     id: this.state.data[this.state.id - 1].transactions.length + 1, title: this.state.title, date: this.state.date,
@@ -113,52 +90,16 @@ export class AddTransactionScreen extends React.Component {
                 &&
                 (this.state.data[this.state.id - 1].balance = Utils.balanceSum_3(this.state.data[this.state.id - 1].transactions)[u] * 100)
                 &&
-                (this.state.data[o].balance = Utils.balanceSum_3(this.state.data[o].transactions)[ this.state.data[o].transactions.length-1] * 100)
+                (this.state.data[o].balance = Utils.balanceSum_3(this.state.data[o].transactions)[this.state.data[o].transactions.length - 1] * 100)
         }
-
-        //   this.setState({
-        //    data: [...this.state.data[0].transactions],
-        //  })
-
         AsyncStorage.setItem('data', JSON.stringify(this.state.data));
 
-        
-        let obj_3
-        if (activeLeft) {
-            obj_3 = {
-                id: id,
-                title: title,
-                date: date,
-                amount: '-' + this.state.text,
-                description: this.state.text_2,
-                category: category,
-                categories: categories,
-                datam: datam
-            }
-        }
-        else {
-            obj_3 = {
-                id: id,
-                title: title,
-                amount: this.state.text,
-                description: this.state.text_2,
-                category: category,
-                date: date,
-                categories: categories,
-            }
-
-
-        }
-    
-      
     }
 
 
 
-    onFocusFunction = () => {
-        // do some stuff on every screen focus
+    onFocusFunction = () => {   
         Storage.get('data', (data) => {
-            //     console.log(this.state.data)
             this.setState({
                 loading: false,
                 data: JSON.parse(data),
@@ -174,43 +115,22 @@ export class AddTransactionScreen extends React.Component {
         })
     }
 
-    // add a focus listener onDidMount
     async componentDidMount() {
         this.focusListener = this.props.navigation.addListener('didFocus', () => {
             this.onFocusFunction()
         })
     }
 
-    // and don't forget to remove the listener
     componentWillUnmount() {
         this.focusListener.remove()
     }
 
-
-
-
-
-    goToDetail = () => {
-        console.log(222)
+    goToDetail = () => { 
         this.props.navigation.navigate('Detail', {
             data: this.state.data,
             categories: this.state.categories,
             id: this.state.id,
         })
-        console.log(222)
-    }
-    
-
-
-    displayInfo_3 = async () => {
-        try {
-            let adder = await AsyncStorage.getItem('adder')
-            let parsed = JSON.parse(adder)
-            alert(this.state.amount)
-        }
-        catch (error) {
-            alert(error)
-        }
     }
 
     setModalVisible(visible) {
@@ -221,6 +141,9 @@ export class AddTransactionScreen extends React.Component {
         this.setState({ title: account.title, selectedItemId: account.id });
         this.setModalVisible(!this.state.modalVisible);
     }
+
+
+
 
     render() {
         return (

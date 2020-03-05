@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import { Storage, Utils } from '../helpers/Index';
 import AsyncStorage from '@react-native-community/async-storage'
-import { NavigationEvents } from 'react-navigation';
 
 export class HomeScreen extends React.Component {
     constructor(props) {
@@ -25,18 +24,14 @@ export class HomeScreen extends React.Component {
     }
 
     componentDidMount() {
-
         Storage.get('data', (data) => {
-            // alert(data.transactions[0].category)
             this.setState({
                 loading: false,
                 data: JSON.parse(data),
-                //  category:JSON.parse(category)
             })
         })
 
         Storage.get('categories', (data) => {
-
             this.setState({
                 loading: false,
                 categories: JSON.parse(data),
@@ -46,7 +41,6 @@ export class HomeScreen extends React.Component {
 
 
     onFocusFunction = () => {
-        // do some stuff on every screen focus
         Storage.get('data', (data) => {
             this.setState({
                 loading: false,
@@ -62,15 +56,12 @@ export class HomeScreen extends React.Component {
         })
     }
 
-    // add a focus listener onDidMount
     async componentDidMount() {
         this.focusListener = this.props.navigation.addListener('didFocus', () => {
             this.onFocusFunction()
         })
-        //    console.log(4, this.state.data[0].transactions)
     }
 
-    // and don't forget to remove the listener
     componentWillUnmount() {
         this.focusListener.remove()
     }
@@ -84,27 +75,22 @@ export class HomeScreen extends React.Component {
             this.state.data[p].balance = Math.round(parsed.balance) * 100,
 
                 this.setState({
-                    //   data: JSON.parse(data),
                     balance: parsed.balance,
-
                 })
         }
         catch (error) {
-            // alert(error)
+            alert(error)
         }
     }
 
 
 
     render() {
-        //   this.displayInfo_2()
-
         if (this.state.loading)
             return <ActivityIndicator />
         return (
             <View style={styles.container}>
                 <View style={styles.header}>
-                    <NavigationEvents onDidFocus={() => console.log('I am triggered')} />
                     <TouchableOpacity style={styles.leftHeader}><Text style={styles.leftHeaderText}>Править</Text></TouchableOpacity>
                     <TouchableOpacity style={styles.centerHeader}
                         onPress={this.displayInfo_2} ><Text style={styles.centerHeaderText}>Счета</Text></TouchableOpacity>
@@ -122,11 +108,9 @@ export class HomeScreen extends React.Component {
                                     onPress={() => {
                                         this.props.navigation.navigate('Detail', {
                                             categories: this.state.categories,
-                                           // id: this.state.data[item.id - 1].id,
-                                             id: item.id,
-                                             data: item
+                                            id: item.id,
+                                            data: item
                                         })
-                                        console.log(1, this.state.data[item.id - 1].id, item.id)
                                     }}
                                 >{item.title}</Text>
                             </View>
@@ -139,11 +123,8 @@ export class HomeScreen extends React.Component {
                                         this.props.navigation.navigate('AddTransaction', {
                                             data: item,
                                             categories: this.state.categories,
-                                          //  id: item.id
-                                          id: this.state.data[item.id - 1].id,
+                                            id: this.state.data[item.id - 1].id,
                                         })
-                                   //     console.log(item)
-
                                     }}>
 
                                     <Image source={require('../assets/image/adder.png')} style={styles.plus}

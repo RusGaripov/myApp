@@ -26,27 +26,22 @@ export class DeepDetailScreen extends React.Component {
     componentDidMount() {
         Storage.get('data', (data) => {
             const parsedData = JSON.parse(data)
-
             this.setState({
                 data: JSON.parse(data),
                 loading: false,
                 title: parsedData[this.state.id_home - 1].transactions[this.state.id - 1].title,
                 date: Utils.timestampToDate(parsedData[this.state.id_home - 1].transactions[this.state.id - 1].date),
-                // date: parsedData[this.state.id_home - 1].transactions[this.state.id - 1].date,
                 description: parsedData[this.state.id_home - 1].transactions[this.state.id - 1].description,
                 category: parsedData[this.state.id_home - 1].transactions[this.state.id - 1].category,
                 amount: parsedData[this.state.id_home - 1].transactions[this.state.id - 1].amount,
                 text: Math.abs(parsedData[this.state.id_home - 1].transactions[this.state.id - 1].amount / 100) + ' ' + "₽",
                 text_2: parsedData[this.state.id_home - 1].transactions[this.state.id - 1].description,
-
             })
-
         })
-        //   console.log(this.state.title)
     }
 
 
-    addItemQuantity = (title, id, account) => {
+    addItemQuantity = (title, id, account) => { //колбэк для пикера
         this.setState({
             category: title
         })
@@ -54,81 +49,22 @@ export class DeepDetailScreen extends React.Component {
     };
 
     saveInfo = async () => {
-        const { title, balance, id, date, category, description, activeLeft, text, text_2,amount, categories, data } = this.state
-        var myDate = this.state.date.toString().split("-");     // date
-        //  myDate = myDate.split("-");
+        const { title, balance, id, date, category, description, activeLeft, text, text_2, amount, categories, data } = this.state
+        var myDate = this.state.date.toString().split("-");     //  преобразование даты
         var newDate = myDate[1] + "/" + myDate[0] + "/" + myDate[2];
         this.state.date = new Date(newDate).getTime() / 1000
-       
+
         {
             activeLeft === true ?
-                data[this.state.id_home-1].transactions[this.state.id-1] = ({ id: id, title: title, amount: -parseFloat(text)*100, description: text_2, category: category, date: this.state.date, categories: categories, })
+                data[this.state.id_home - 1].transactions[this.state.id - 1] = ({ id: id, title: title, amount: -parseFloat(text) * 100, description: text_2, category: category, date: this.state.date, categories: categories, })
 
-                : data[this.state.id_home-1].transactions[this.state.id-1] = ({ id: id, title: title, amount: parseFloat(text)*100, description: text_2, category: category, date: this.state.date, categories: categories, })
+                : data[this.state.id_home - 1].transactions[this.state.id - 1] = ({ id: id, title: title, amount: parseFloat(text) * 100, description: text_2, category: category, date: this.state.date, categories: categories, })
         }
         AsyncStorage.setItem('data', JSON.stringify(data));
-      //  console.log(Utils.balanceSum_3(this.state.data[this.state.id_home - 1].transactions)[u] * 100))
-      this.props.navigation.navigate('Detail')
+
+        this.props.navigation.navigate('Detail')
     }
 
-
-
-    //console.log(this.state.id)
-
-
-
-
-
-
-
-    /*  saveInfo = () => {
-          const { title, balance, id, date, category, description, activeLeft, text, categories } = this.state
-  
-          let obj
-  
-          if (activeLeft) {
-  
-              obj = {
-                  id: id,
-                  title: title,
-                  amount: '-' + this.state.text,
-                  description: this.state.text_2,
-                  category: category,
-                  date: date,
-                  categories: categories,
-  
-              }
-          }
-          else {
-              obj = {
-                  id: id,
-                  title: title,
-                  amount: this.state.text,
-                  description: this.state.text_2,
-                  category: category,
-                  date: date,
-                  categories: categories,
-              }
-  
-              //alert(this.state.title)
-          }
-      
-  console.log(this.state.data[0].transactions[0])
-  
-          AsyncStorage.setItem('trans', JSON.stringify(obj));
-      }
-  
-      displayInfo = async () => {
-          try {
-              let trans = await AsyncStorage.getItem('trans')
-              let parsed = JSON.parse(trans)
-              //    alert(parsed.category)
-              //    console.log(parsed.title)
-          }
-          catch (error) {
-              alert(error)
-          }
-      }*/
     setModalVisible(visible) {
         this.setState({ modalVisible: visible });
     }
@@ -136,8 +72,6 @@ export class DeepDetailScreen extends React.Component {
         this.setState({ title: account.title, selectedItemId: account.id, amount: this.state.text });
         this.setModalVisible(!this.state.modalVisible);
     }
-
-
 
     render() {
         return (
@@ -194,7 +128,6 @@ export class DeepDetailScreen extends React.Component {
                                     activeLeft: false,
                                     activeRight: false,
                                     activeCenter: true,
-                                    text: 'ddddd'
                                 })
                             }}
                         ><Text style={styles.centerMenuText_2}>Поступление</Text></TouchableOpacity>}

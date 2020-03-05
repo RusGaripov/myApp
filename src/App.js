@@ -10,7 +10,6 @@ import { HomeScreen } from './screens/HomeScreen';
 import { DetailScreen } from './screens/DetailScreen';
 import { DeepDetailScreen } from './screens/DeepDetailScreen';
 import { AddTransactionScreen } from './screens/AddTransactionScreen';
-import { NewFormScreen } from './screens/NewFormScreen';
 
 // helpers
 import { Storage } from './helpers/Index';
@@ -29,7 +28,6 @@ const RootStack = createStackNavigator(
                 header: null,
             },
         },
-        NewForm: NewFormScreen,
         DeepDetail: {
             screen: DeepDetailScreen,
             navigationOptions: {
