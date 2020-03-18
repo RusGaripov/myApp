@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Text, View, TextInput, StyleSheet, Image, FlatList, TouchableOpacity } from 'react-native';
+import { Modal, Text, View, TextInput, StyleSheet, Image, FlatList, TouchableOpacity, TouchableHighlightBase } from 'react-native';
 import ModalExample from '../components/Picker';
 import DatePicker from 'react-native-datepicker'
 import AsyncStorage from '@react-native-community/async-storage'
@@ -15,15 +15,24 @@ export class DeepDetailScreen extends React.Component {
             id: this.props.navigation.getParam('id'),
             id_home: this.props.navigation.getParam('id_home'),
             data: null,
+            trans: null,
             activeLeft: true,
             activeCenter: false,
             activeRight: false,
             selectField: 'Справа',
             modalVisible: false,
+            o: null,
+            accountId: null
         }
     }
 
     componentDidMount() {
+        Storage.get('trans', (trans) => {
+            this.setState({
+                loading: false,
+                trans: JSON.parse(trans),
+            })
+        })
         Storage.get('data', (data) => {
             const parsedData = JSON.parse(data)
             this.setState({
@@ -34,11 +43,21 @@ export class DeepDetailScreen extends React.Component {
                 description: parsedData[this.state.id_home - 1].transactions[this.state.id - 1].description,
                 category: parsedData[this.state.id_home - 1].transactions[this.state.id - 1].category,
                 amount: parsedData[this.state.id_home - 1].transactions[this.state.id - 1].amount,
+                //  amount:Math.abs(parsedData[this.state.id_home - 1].transactions[this.state.id - 1].amount / 100) + ' ' + "₽",
                 text: Math.abs(parsedData[this.state.id_home - 1].transactions[this.state.id - 1].amount / 100) + ' ' + "₽",
                 text_2: parsedData[this.state.id_home - 1].transactions[this.state.id - 1].description,
+                status: parsedData[this.state.id_home - 1].transactions[this.state.id - 1].status,
+                activeLeft: parsedData[this.state.id_home - 1].transactions[this.state.id - 1].status == "debtor" ? true : false,
+                activeCenter: parsedData[this.state.id_home - 1].transactions[this.state.id - 1].status == "creditor" ? true : false,
             })
         })
+
+
     }
+
+
+
+
 
 
     addItemQuantity = (title, id, account) => { //колбэк для пикера
@@ -49,21 +68,400 @@ export class DeepDetailScreen extends React.Component {
     };
 
     saveInfo = async () => {
+        console.log(this.state.trans, this.state.data)
         const { title, balance, id, date, category, description, activeLeft, text, text_2, amount, categories, data } = this.state
         var myDate = this.state.date.toString().split("-");     //  преобразование даты
         var newDate = myDate[1] + "/" + myDate[0] + "/" + myDate[2];
         this.state.date = new Date(newDate).getTime() / 1000
 
-        {
-            activeLeft === true ?
-                data[this.state.id_home - 1].transactions[this.state.id - 1] = ({ id: id, title: title, amount: -parseFloat(text) * 100, description: text_2, category: category, date: this.state.date, categories: categories, })
-
-                : data[this.state.id_home - 1].transactions[this.state.id - 1] = ({ id: id, title: title, amount: parseFloat(text) * 100, description: text_2, category: category, date: this.state.date, categories: categories, })
+        var o;
+        for (var i = 0; i < this.state.data.length; i++) {
+            if (this.state.title == this.state.data[i].title)
+                o = i
         }
-        AsyncStorage.setItem('data', JSON.stringify(data));
 
-        this.props.navigation.navigate('Detail')
+        if (this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].title == this.state.title) {
+
+            if (this.state.activeLeft === true && this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].status == "creditor") {
+                alert('первый вар')
+                this.state.data[this.state.id_home - 1].transactions[this.state.id - 1] = ({
+                    id: id, title: title,
+                    status: "debtor",
+                    transactionId: this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId,
+                    amount: -1 * parseFloat(text) * 100, description: text_2, category: category, date: this.state.date, categories: categories,
+                })
+
+
+                var u;
+                for (var i = 0; i < this.state.data[o].transactions.length; i++) {
+                    if (this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId == this.state.data[o].transactions[i].transactionId)
+                        u = i
+                }
+                console.log(o, u)
+
+
+                this.state.data[o].transactions[u]
+                    = ({
+                        id: u + 1,
+                        status: "creditor",
+                        transactionId: this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId,
+                        title: this.state.data[this.state.id_home - 1].title,
+                        amount: parseFloat(text) * 100, description: text_2, category: category, date: this.state.date, categories: categories,
+                    })
+
+                this.state.trans[this.state.data[o].transactions[u].transactionId - 1].infoDebtor.accountId = this.state.trans[this.state.data[o].transactions[u].transactionId - 1].infoCreditor.accountId
+                this.state.trans[this.state.data[o].transactions[u].transactionId - 1].infoDebtor.transId = this.state.trans[this.state.data[o].transactions[u].transactionId - 1].infoCreditor.transId
+
+
+                this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoCreditor.accountId = o + 1
+                this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoCreditor.transId = u + 1
+
+
+
+
+
+
+            }
+            else if (this.state.activeLeft === true && this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].status == "debtor") {
+                alert('полуторный вар')
+                this.state.data[this.state.id_home - 1].transactions[this.state.id - 1] = ({
+                    id: id, title: title,
+                    status: "debtor",
+                    transactionId: this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId,
+                    amount: -1 * parseFloat(text) * 100, description: text_2, category: category, date: this.state.date, categories: categories,
+                })
+
+
+                var u;
+                for (var i = 0; i < this.state.data[o].transactions.length; i++) {
+                    if (this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId == this.state.data[o].transactions[i].transactionId)
+                        u = i
+                }
+                console.log(o, u)
+
+
+                this.state.data[o].transactions[u]
+                    = ({
+                        id: u + 1,
+
+                        status: "creditor",
+                        transactionId: this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId,
+                        title: this.state.data[this.state.id_home - 1].title,
+                        amount: parseFloat(text) * 100, description: text_2, category: category, date: this.state.date, categories: categories,
+                    })
+
+                //    this.state.trans[this.state.data[o].transactions[u].transactionId - 1].infoDebtor.accountId = this.state.trans[this.state.data[o].transactions[u].transactionId - 1].infoDebtor.accountId
+                //     this.state.trans[this.state.data[o].transactions[u].transactionId - 1].infoDebtor.transId = this.state.trans[this.state.data[o].transactions[u].transactionId - 1].infoDebtor.transId
+
+
+                //   this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoCreditor.accountId = o + 1
+                //   this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoCreditor.transId = u + 1
+
+
+
+
+
+
+            }
+
+
+
+
+
+
+            else if (this.state.activeCenter === true && this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].status == "debtor") {
+                alert('второй вар')
+                this.state.data[this.state.id_home - 1].transactions[this.state.id - 1] = ({
+                    id: id, title: title,
+                    status: "creditor",
+                    transactionId: this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId,
+                    amount: parseFloat(text) * 100, description: text_2, category: category, date: this.state.date, categories: categories,
+                })
+
+
+                var u;
+                for (var i = 0; i < this.state.data[o].transactions.length; i++) {
+                    if (this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId == this.state.data[o].transactions[i].transactionId)
+                        u = i
+                }
+
+
+
+
+                this.state.data[o].transactions[u]
+                    = ({
+                        id: u + 1,
+                        status: "debtor",
+                        transactionId: this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId,
+                        title: this.state.data[this.state.id_home - 1].title,
+                        amount: (-1) * parseFloat(text) * 100, description: text_2, category: category, date: this.state.date, categories: categories,
+                    })
+
+                this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoCreditor.accountId = this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoDebtor.accountId
+                this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoCreditor.transId = this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoDebtor.transId
+
+
+                this.state.trans[this.state.data[o].transactions[u].transactionId - 1].infoDebtor.accountId = o + 1
+                this.state.trans[this.state.data[o].transactions[u].transactionId - 1].infoDebtor.transId = u + 1
+
+
+
+            }
+
+
+            else if (this.state.activeCenter === true && this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].status == "creditor") {
+                alert('два с половиной вар')
+                this.state.data[this.state.id_home - 1].transactions[this.state.id - 1] = ({
+                    id: id, title: title,
+                    status: "creditor",
+                    transactionId: this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId,
+                    amount: parseFloat(text) * 100, description: text_2, category: category, date: this.state.date, categories: categories,
+                })
+
+
+                var u;
+                for (var i = 0; i < this.state.data[o].transactions.length; i++) {
+                    if (this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId == this.state.data[o].transactions[i].transactionId)
+                        u = i
+                }
+
+
+
+
+                this.state.data[o].transactions[u]
+                    = ({
+                        id: u + 1,
+                        status: "debtor",
+                        transactionId: this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId,
+                        title: this.state.data[this.state.id_home - 1].title,
+                        amount: (-1) * parseFloat(text) * 100, description: text_2, category: category, date: this.state.date, categories: categories,
+                    })
+
+                //    this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoCreditor.accountId = this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoDebtor.accountId
+                //   this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoCreditor.transId = this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoDebtor.transId
+
+
+                //     this.state.trans[this.state.data[o].transactions[u].transactionId - 1].infoDebtor.accountId = o + 1
+                //     this.state.trans[this.state.data[o].transactions[u].transactionId - 1].infoDebtor.transId = u + 1
+
+
+
+            }
+
+            else {
+                return alert('ho')
+            }
+        }
+
+
+
+
+        else {
+            if (this.state.activeLeft === true && this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].status == "debtor") {
+                alert('5 вар')
+
+                this.state.data[this.state.id_home - 1].transactions[this.state.id - 1] = ({
+                    id: id, title: title,
+                    status: "debtor",
+                    transactionId: this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId,
+                    amount: -1 * parseFloat(text) * 100, description: text_2, category: category, date: this.state.date, categories: categories,
+                })
+
+
+
+                var o;
+                for (var i = 0; i < this.state.data.length; i++) {
+                    if (this.state.title == this.state.data[i].title)
+                        o = i
+                }
+
+                this.state.data[this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoCreditor.accountId - 1].transactions.splice(this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoCreditor.transId - 1, 1)// почему не .transId-1 ???
+                // ключевая разница между 5 и 6 вариантом сверху
+
+                this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoDebtor.accountId = this.state.id_home
+                this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoDebtor.transId = this.state.id
+                console.log(this.state.id_home, this.state.id)
+
+
+                this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoCreditor.accountId = o + 1
+                this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoCreditor.transId = this.state.data[o].transactions.length + 1
+                console.log(o, this.state.data[o].transactions.length)
+
+
+                this.state.data[o].transactions.push({
+                    id: this.state.data[o].transactions.length + 1,
+                    status: "creditor",
+                    transactionId: this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId,
+                    title: this.state.data[this.state.id_home - 1].title,
+                    amount: parseFloat(text) * 100, description: text_2, category: category, date: this.state.date, categories: categories,
+                })
+
+
+
+
+
+                AsyncStorage.setItem('trans', JSON.stringify(this.state.trans));//нужно ли ?
+
+            }
+
+            else if (this.state.activeLeft === true && this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].status == "creditor") {
+                alert('6 вар')
+
+                this.state.data[this.state.id_home - 1].transactions[this.state.id - 1] = ({
+                    id: id, title: title,
+                    status: "debtor",
+                    transactionId: this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId,
+                    amount: -1 * parseFloat(text) * 100, description: text_2, category: category, date: this.state.date, categories: categories,
+                })
+
+
+
+                var o;
+                for (var i = 0; i < this.state.data.length; i++) {
+                    if (this.state.title == this.state.data[i].title)
+                        o = i
+                }
+
+                this.state.data[this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoDebtor.accountId - 1].transactions.splice(this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoDebtor.transId - 1, 1)// почему не .transId-1 ???
+
+
+                this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoDebtor.accountId = this.state.id_home
+                this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoDebtor.transId = this.state.id
+                console.log(this.state.id_home, this.state.id)
+
+
+                this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoCreditor.accountId = o + 1
+                this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoCreditor.transId = this.state.data[o].transactions.length + 1
+                console.log(o, this.state.data[o].transactions.length)
+
+
+                this.state.data[o].transactions.push({
+                    id: this.state.data[o].transactions.length + 1,
+                    status: "creditor",
+                    transactionId: this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId,
+                    title: this.state.data[this.state.id_home - 1].title,
+                    amount: parseFloat(text) * 100, description: text_2, category: category, date: this.state.date, categories: categories,
+                })
+
+
+
+
+
+                AsyncStorage.setItem('trans', JSON.stringify(this.state.trans));//нужно ли ?
+
+            }
+
+
+
+
+            else if (this.state.activeCenter === true && this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].status == "debtor") {
+                alert('7 вар')
+                console.log(this.state.data, this.state.trans)
+                this.state.data[this.state.id_home - 1].transactions[this.state.id - 1] = ({
+                    id: id,
+                    title: title,
+                    //  status: "debtor",
+                    status: "creditor",
+                    transactionId: this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId,
+                    amount: parseFloat(text) * 100, description: text_2, category: category, date: this.state.date, categories: categories,
+                })
+
+
+                this.state.data[this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoCreditor.accountId - 1].transactions.splice(this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoCreditor.transId - 1, 1)// почему не .transId-1 ???
+                console.log(this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoCreditor.accountId - 1)
+                console.log(this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoCreditor.transId - 1)
+
+                var o;
+                for (var i = 0; i < this.state.data.length; i++) {
+                    if (this.state.title == this.state.data[i].title)
+                        o = i
+                }
+
+
+
+
+                this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoCreditor.accountId = this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoDebtor.accountId
+                this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoCreditor.transId = this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoDebtor.transId
+                this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoDebtor.accountId = o + 1
+                this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoDebtor.transId = this.state.data[o].transactions.length + 1
+
+
+
+
+                this.state.data[o].transactions.push({
+                    id: this.state.data[o].transactions.length + 1,
+                    status: "debtor",
+                    transactionId: this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId,
+                    title: this.state.data[this.state.id_home - 1].title,
+                    amount: -1 * parseFloat(text) * 100, description: text_2, category: category, date: this.state.date, categories: categories,
+                })
+                AsyncStorage.setItem('trans', JSON.stringify(this.state.trans));//нужно ли ?
+                AsyncStorage.setItem('data', JSON.stringify(this.state.data));
+
+            }
+
+            else if (this.state.activeCenter === true && this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].status == "creditor") {
+                alert('8 вар')
+                console.log(this.state.data, this.state.trans)
+                this.state.data[this.state.id_home - 1].transactions[this.state.id - 1] = ({
+                    id: id, title: title,
+                    //  status: "debtor",
+                    status: "creditor",
+                    transactionId: this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId,
+                    amount: parseFloat(text) * 100, description: text_2, category: category, date: this.state.date, categories: categories,
+                })
+
+
+                this.state.data[this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoDebtor.accountId - 1].transactions.splice(this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoDebtor.transId - 1, 1)// почему не .transId-1 ???
+
+
+                var o;
+                for (var i = 0; i < this.state.data.length; i++) {
+                    if (this.state.title == this.state.data[i].title)
+                        o = i
+                }
+
+
+
+
+                this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoCreditor.accountId = this.state.id_home
+                this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoCreditor.transId = this.state.id
+                this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoDebtor.accountId = o + 1
+                this.state.trans[this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId - 1].infoDebtor.transId = this.state.data[o].transactions.length + 1
+
+
+
+
+                this.state.data[o].transactions.push({
+                    id: this.state.data[o].transactions.length + 1,
+                    status: "debtor",
+                    transactionId: this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].transactionId,
+                    title: this.state.data[this.state.id_home - 1].title,
+                    amount: -1 * parseFloat(text) * 100, description: text_2, category: category, date: this.state.date, categories: categories,
+                })
+                AsyncStorage.setItem('trans', JSON.stringify(this.state.trans));//нужно ли ?
+                AsyncStorage.setItem('data', JSON.stringify(this.state.data));
+
+            }
+
+
+            else {
+                alert('ho-ho')
+            }
+
+        }
+
+        AsyncStorage.setItem('data', JSON.stringify(data));
+        AsyncStorage.setItem('trans', JSON.stringify(this.state.trans));//нужно ли ?
+
+        this.props.navigation.navigate('Detail'), {
+            trans: this.state.trans,
+            data: this.state.data
+        }
     }
+
+
+
 
     setModalVisible(visible) {
         this.setState({ modalVisible: visible });
@@ -73,13 +471,40 @@ export class DeepDetailScreen extends React.Component {
         this.setModalVisible(!this.state.modalVisible);
     }
 
+
+
+
+    /* activator = async () => {
+         if (this.state.data[this.state.id_home - 1].transactions[this.state.id - 1].status == "debtor") {
+             this.setState({
+                 activeLeft: true,
+                 activeCenter: false
+             })
+ 
+         }
+         else {
+ 
+             this.setState({
+                 activeLeft: false,
+                 activeCenter: true
+             })
+         }
+         console.log(this.state.activeLeft, this.state.activeCenter)
+     }*/
+
+
+
+
     render() {
+        //   this.activator()
         return (
             <View style={styles.container}>
                 <View style={styles.header}>
                     <TouchableOpacity style={styles.leftHeader}
                         onPress={() => {
-                            this.props.navigation.navigate('Detail')
+                            this.props.navigation.navigate('Detail'), {
+                                trans: this.state.trans
+                            }
                         }}
                     ><Text style={styles.leftHeaderText}>Назад</Text>
                     </TouchableOpacity>

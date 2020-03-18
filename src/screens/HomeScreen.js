@@ -37,6 +37,13 @@ export class HomeScreen extends React.Component {
                 categories: JSON.parse(data),
             })
         })
+
+        Storage.get('trans', (trans) => {
+            this.setState({
+                loading: false,
+                trans: JSON.parse(trans),
+            })
+        })
     }
 
 
@@ -52,6 +59,13 @@ export class HomeScreen extends React.Component {
             this.setState({
                 loading: false,
                 categories: JSON.parse(data),
+            })
+        })
+
+        Storage.get('trans', (trans) => {
+            this.setState({
+                loading: false,
+                trans: JSON.parse(trans),
             })
         })
     }
@@ -84,8 +98,24 @@ export class HomeScreen extends React.Component {
     }
 
 
+    counter = async () => {
+
+        for (var i = 0; i < 10; i++)
+            if (this.state.data[i].transactions.length != 0)
+                this.state.data[i].balance = Utils.balanceSum_3(this.state.data[i].transactions)[this.state.data[i].transactions.length - 1] * 100
+            else {
+                this.state.data[i].balance = 0
+            }
+
+
+
+        AsyncStorage.setItem('data', JSON.stringify(this.state.data));
+    }
+
+
 
     render() {
+        this.counter()
         if (this.state.loading)
             return <ActivityIndicator />
         return (

@@ -19,13 +19,13 @@ export class AddTransactionScreen extends React.Component {
             text: Math.abs(this.props.navigation.getParam('amount') / 100) + ' ' + "₽",
             title: 'Выберите счет',
             data: null,
+            trans: null,
             activeLeft: true,
             activeCenter: false,
             activeRight: false,
             selectField: 'Справа',
             modalVisible: false,
         }
-
     }
 
     componentDidMount() {
@@ -35,6 +35,13 @@ export class AddTransactionScreen extends React.Component {
             this.setState({
                 loading: false,
                 data: JSON.parse(data),
+            })
+        })
+
+        Storage.get('trans', (trans) => {
+            this.setState({
+                loading: false,
+                trans: JSON.parse(trans),
             })
         })
 
@@ -63,14 +70,29 @@ export class AddTransactionScreen extends React.Component {
         let u = this.state.data[this.state.id - 1].transactions.length
 
 
+
+        {
+            this.state.activeLeft === true ?
+                this.state.trans.push({
+                    id: this.state.trans.length + 1, infoDebtor: { accountId: this.state.id, transId: this.state.data[this.state.id - 1].transactions.length + 1 },
+                    infoCreditor: { accountId: o + 1, transId: this.state.data[o].transactions.length + 1 }
+                })
+                :
+                this.state.trans.push({
+                    id: this.state.trans.length + 1, infoDebtor: { accountId: o + 1, transId: this.state.data[o].transactions.length + 1 },
+                    infoCreditor: { accountId: this.state.id, transId: this.state.data[this.state.id - 1].transactions.length + 1 }
+                })
+        }
+
+
         {
             this.state.activeLeft === true ?
                 this.state.data[this.state.id - 1].transactions.push({
-                    id: this.state.data[this.state.id - 1].transactions.length + 1, title: this.state.title, date: this.state.date,
+                    id: this.state.data[this.state.id - 1].transactions.length + 1, transactionId: this.state.trans.length, status: "debtor", title: this.state.title, date: this.state.date,
                     amount: -parseInt(this.state.text), category: this.state.category, description: this.state.text_2
                 }) &&
                 this.state.data[o].transactions.push({
-                    id: this.state.data[o].transactions.length + 1, title: this.state.title, date: this.state.date,
+                    id: this.state.data[o].transactions.length + 1, transactionId: this.state.trans.length, status: "creditor", title:this.state.data[this.state.id - 1].title , date: this.state.date,
                     amount: parseInt(this.state.text), category: this.state.category, description: this.state.text_2
                 })
                 &&
@@ -79,26 +101,27 @@ export class AddTransactionScreen extends React.Component {
                 (this.state.data[o].balance = Utils.balanceSum_3(this.state.data[o].transactions)[this.state.data[o].transactions.length - 1] * 100)
                 :
                 this.state.data[this.state.id - 1].transactions.push({
-                    id: this.state.data[this.state.id - 1].transactions.length + 1, title: this.state.title, date: this.state.date,
+                    id: this.state.data[this.state.id - 1].transactions.length + 1, transactionId: this.state.trans.length, status: "creditor", title: this.state.title, date: this.state.date,
                     amount: parseInt(this.state.text), category: this.state.category, description: this.state.text_2
                 }) &&
                 this.state.data[o].transactions.push({
-                    id: this.state.data[o].transactions.length + 1, title: this.state.title, date: this.state.date,
+                    id: this.state.data[o].transactions.length + 1, transactionId: this.state.trans.length, status: "debtor", title: this.state.title, date: this.state.date,
                     amount: -parseInt(this.state.text), category: this.state.category, description: this.state.text_2
-                }) &&
-                (this.state.data[this.state.id - 1].balance = Utils.balanceSum_3(this.state.data[this.state.id - 1].transactions)[u - 1] * 100)
+                }) 
+                //&&
+             //   (this.state.data[this.state.id - 1].balance = Utils.balanceSum_3(this.state.data[this.state.id - 1].transactions)[u - 1] * 100)
                 &&
                 (this.state.data[this.state.id - 1].balance = Utils.balanceSum_3(this.state.data[this.state.id - 1].transactions)[u] * 100)
                 &&
                 (this.state.data[o].balance = Utils.balanceSum_3(this.state.data[o].transactions)[this.state.data[o].transactions.length - 1] * 100)
         }
         AsyncStorage.setItem('data', JSON.stringify(this.state.data));
-
+        AsyncStorage.setItem('trans', JSON.stringify(this.state.trans));
     }
 
 
 
-    onFocusFunction = () => {   
+    onFocusFunction = () => {
         Storage.get('data', (data) => {
             this.setState({
                 loading: false,
@@ -113,6 +136,12 @@ export class AddTransactionScreen extends React.Component {
                 categories: JSON.parse(data),
             })
         })
+        Storage.get('trans', (trans) => {
+            this.setState({
+                loading: false,
+                trans: JSON.parse(trans),
+            })
+        })
     }
 
     async componentDidMount() {
@@ -125,7 +154,7 @@ export class AddTransactionScreen extends React.Component {
         this.focusListener.remove()
     }
 
-    goToDetail = () => { 
+    goToDetail = () => {
         this.props.navigation.navigate('Detail', {
             data: this.state.data,
             categories: this.state.categories,
@@ -162,7 +191,6 @@ export class AddTransactionScreen extends React.Component {
                                 categories: this.state.categories,
                                 id: this.state.id,
                             })
-                            console.log(2)
                         }}
 
                     ><Text style={styles.centerHeaderText}>Операция</Text></TouchableOpacity>

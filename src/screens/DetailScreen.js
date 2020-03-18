@@ -12,6 +12,7 @@ export class DetailScreen extends React.Component {
         this.state = {
             categories: this.props.navigation.getParam('categories'),
             data: null,
+            trans:null,
             loading: true,
             id: this.props.navigation.getParam('id'),
         }
@@ -23,6 +24,12 @@ export class DetailScreen extends React.Component {
             this.setState({
                 loading: false,
                 data: JSON.parse(data),
+            })
+        })
+        Storage.get('trans', (trans) => {
+            this.setState({
+                loading: false,
+                trans: JSON.parse(trans),
             })
         })
     }
@@ -42,10 +49,17 @@ export class DetailScreen extends React.Component {
     }
 
     onFocusFunction = () => {
+       
         Storage.get('data', (data) => {
             this.setState({
                 loading: false,
                 data: JSON.parse(data),
+            })
+        })
+        Storage.get('trans', (trans) => {
+            this.setState({
+                loading: false,
+                trans: JSON.parse(trans),
             })
         })
     }
@@ -116,10 +130,10 @@ export class DetailScreen extends React.Component {
                                     </View>
                                 </View>
                             </TouchableOpacity>
-                            <View style={styles.secondColumnStyle}>
-                                <View style={styles.subSecondColumn}>{item.amount / 100 >= 0 ? <View style={styles.thirdColumnStyle}>
+                                <View style={styles.secondColumnStyle}>
+                            <View style={styles.subSecondColumn}>{item.amount / 100 >= 0 ? <View style={styles.thirdColumnStyle}>
                                     <Text style={styles.sumStyle}>{item.amount / 100 + " " + "₽"}</Text></View> :
-                                    <View style={styles.thirdColumnStyle}><Text style={styles.sumStyle_2}>{Math.abs(item.amount) / 100 + " " + "₽"}
+                            <View style={styles.thirdColumnStyle}><Text style={styles.sumStyle_2}>{Math.abs(item.amount) / 100 + " " + "₽"}
                                     </Text>
                                     </View>}
                                     <Image source={require('../assets/image/forward.png')} style={styles.forward} />
